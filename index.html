@@ -274,11 +274,11 @@ html,body{
     </div>
   </div>
 
-  <!-- SHEET: Ajouter appareil -->
+  <!-- SHEET: Ajouter/Modifier appareil -->
   <div class="modal-overlay" id="sheet-device">
     <div class="sheet">
       <div class="sheet-handle"></div>
-      <div class="sheet-title">Ajouter un appareil</div>
+      <div class="sheet-title" id="sheet-device-title">Ajouter un appareil</div>
       <div class="sheet-body">
         <div class="field"><label>Nom *</label><input id="d-name" type="text" placeholder="Ex: Mon PC, Raspberry Pi…"></div>
         <div class="field"><label>Type</label>
@@ -293,6 +293,7 @@ html,body{
       </div>
       <div class="sheet-actions" style="flex-direction:column;gap:8px">
         <button class="btn btn-primary btn-full" onclick="saveDevice()">Enregistrer</button>
+        <button class="btn btn-danger btn-full" id="btn-delete-device" style="display:none" onclick="deleteDevice()">Supprimer l'appareil</button>
         <button class="btn btn-full" onclick="closeSheet('sheet-device')">Annuler</button>
       </div>
     </div>
@@ -436,7 +437,7 @@ function renderDeviceList(){
     const count=games.filter(g=>g.device===d.id).length;
     const icon=d.type==='emulator'?'🕹️':'🖥️';
     const sub=d.type==='emulator'&&d.emulators.length?d.emulators.join(', '):'PC / Mac';
-    return `<div class="device-card">
+    return `<div class="device-card" onclick="openDeviceDetail('${d.id}')">
       <div class="device-card-left">
         <div class="device-avatar" style="background:${d.type==='emulator'?'#EEEDFE':'#E6F1FB'}">${icon}</div>
         <div><div class="device-name">${d.name}</div><div class="device-sub">${sub}</div></div>
@@ -565,22 +566,57 @@ function deleteGame(){
   });
 }
 
+let editingDeviceId=null;
+
 function openAddDevice(){
+  editingDeviceId=null;
+  document.getElementById('sheet-device-title').textContent='Ajouter un appareil';
   document.getElementById('d-name').value='';
   document.getElementById('d-type').value='pc';
   document.getElementById('d-emulators').value='';
   document.getElementById('d-emu-wrap').style.display='none';
+  document.getElementById('btn-delete-device').style.display='none';
   openSheet('sheet-device');
 }
+
+function openDeviceDetail(id){
+  editingDeviceId=id;
+  const d=devices.find(x=>x.id===id);
+  document.getElementById('sheet-device-title').textContent='Modifier l\'appareil';
+  document.getElementById('d-name').value=d.name;
+  document.getElementById('d-type').value=d.type;
+  document.getElementById('d-emulators').value=d.emulators.join(', ');
+  document.getElementById('d-emu-wrap').style.display=d.type==='emulator'?'block':'none';
+  document.getElementById('btn-delete-device').style.display='block';
+  openSheet('sheet-device');
+}
+
 function saveDevice(){
   const name=document.getElementById('d-name').value.trim();
   if(!name){alert('Le nom est requis.');return;}
   const type=document.getElementById('d-type').value;
   const emulators=type==='emulator'?document.getElementById('d-emulators').value.split(',').map(s=>s.trim()).filter(Boolean):[];
-  devices.push({id:uid(),name,type,emulators});
+  if(editingDeviceId){
+    const d=devices.find(x=>x.id===editingDeviceId);
+    d.name=name;d.type=type;d.emulators=emulators;
+  } else {
+    devices.push({id:uid(),name,type,emulators});
+  }
   closeSheet('sheet-device');
   save();
   renderAll();
+}
+
+function deleteDevice(){
+  const d=devices.find(x=>x.id===editingDeviceId);
+  const count=games.filter(g=>g.device===editingDeviceId).length;
+  const msg=count>0?`Cet appareil contient ${count} jeu${count>1?'x':''}. Ils seront conservés mais sans appareil assigné.`:'Cette action est irréversible.';
+  showConfirm(`Supprimer "${d.name}" ?`, msg, function(){
+    devices=devices.filter(x=>x.id!==editingDeviceId);
+    closeSheet('sheet-device');
+    save();
+    renderAll();
+  });
 }
 
 function openImportSheet(){
