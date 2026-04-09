@@ -147,6 +147,13 @@ html,body{
 
 .import-zone{border:0.5px dashed var(--color-border-secondary);border-radius:12px;padding:24px 16px;text-align:center;color:var(--color-text-secondary);font-size:13px;cursor:pointer;margin-bottom:14px}
 .import-zone:active{background:var(--color-background-secondary)}
+
+.filter-bar{display:flex;gap:8px;padding:6px 16px 8px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.filter-group{display:flex;flex-direction:column;gap:3px;flex:1}
+.filter-label{font-size:10px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.04em}
+.filter-group select{padding:6px 8px;border-radius:10px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-family:var(--font-sans);font-size:12px}
+
+.group-title{font-size:12px;font-weight:600;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.05em;padding:14px 0 6px;margin:0}
 </style>
 </head>
 <body>
@@ -168,12 +175,31 @@ html,body{
     <div class="device-tabs" id="device-tabs"></div>
     <div class="search-bar">
       <input type="text" id="search" placeholder="Rechercher…" oninput="renderGames()">
-      <select id="filter-status" onchange="renderGames()">
-        <option value="">Tous</option>
-        <option value="notstarted">À faire</option>
-        <option value="inprogress">En cours</option>
-        <option value="done">Terminé</option>
-      </select>
+    </div>
+    <div class="filter-bar">
+      <div class="filter-group">
+        <span class="filter-label">État</span>
+        <select id="filter-status" onchange="renderGames()">
+          <option value="">Tous</option>
+          <option value="notstarted">À faire</option>
+          <option value="inprogress">En cours</option>
+          <option value="done">Terminé</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Console</span>
+        <select id="filter-console" onchange="renderGames()">
+          <option value="">Toutes</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Grouper</span>
+        <select id="group-by" onchange="renderGames()">
+          <option value="">Aucun</option>
+          <option value="status">Par état</option>
+          <option value="console">Par console</option>
+        </select>
+      </div>
     </div>
     <div class="scrollable">
       <div class="game-list" id="game-list"></div>
@@ -397,13 +423,54 @@ function renderDeviceTabs(){
 }
 function setTab(id){activeTab=id;renderDeviceTabs();renderGames();}
 
+function updateConsoleFilter(){
+  const sel=document.getElementById('filter-console');
+  if(!sel)return;
+  const current=sel.value;
+
+  // Toutes les consoles connues jusqu'à la Switch
+  const allKnown=[
+    // Nintendo
+    'NES','SNES','Nintendo 64','GameCube','Wii','Wii U','Nintendo Switch',
+    'Game Boy','Game Boy Color','Game Boy Advance','Nintendo DS','Nintendo 3DS',
+    'Virtual Boy',
+    // PlayStation
+    'PS1','PS2','PS3','PS4','PS5',
+    'PSP','PS Vita',
+    // Xbox
+    'Xbox','Xbox 360','Xbox One','Xbox Series X',
+    // Sega
+    'Master System','Mega Drive','Saturn','Dreamcast',
+    'Game Gear','Sega CD','32X',
+    // Atari
+    'Atari 2600','Atari 5200','Atari 7800','Atari Jaguar','Atari Lynx',
+    // NEC
+    'PC Engine','PC-FX',
+    // SNK
+    'Neo Geo','Neo Geo Pocket',
+    // PC
+    'PC','Mac',
+    // Autres
+    'Arcade','3DO','ColecoVision','Intellivision','Odyssey'
+  ];
+
+  const fromGames=games.map(g=>g.platform).filter(Boolean);
+  const fromEmulators=devices.filter(d=>d.type==='emulator').flatMap(d=>d.emulators);
+  const allConsoles=[...new Set([...allKnown,...fromGames,...fromEmulators])].sort();
+  sel.innerHTML='<option value="">Toutes</option>'+allConsoles.map(c=>`<option value="${c}"${c===current?' selected':''}>${c}</option>`).join('');
+}
+
 function renderGames(){
+  updateConsoleFilter();
   const search=(document.getElementById('search')?.value||'').toLowerCase();
   const fs=document.getElementById('filter-status')?.value||'';
+  const fc=document.getElementById('filter-console')?.value||'';
+  const groupBy=document.getElementById('group-by')?.value||'';
   let filtered=games.filter(g=>{
     if(activeTab!=='all'&&g.device!==activeTab)return false;
     if(search&&!g.title.toLowerCase().includes(search))return false;
     if(fs&&g.status!==fs)return false;
+    if(fc&&(g.platform||'')!==fc)return false;
     return true;
   });
   const total=games.length,done=games.filter(g=>g.status==='done').length,hrs=games.reduce((s,g)=>s+(g.time||0),0);
@@ -414,7 +481,8 @@ function renderGames(){
   if(!list)return;
   if(filtered.length===0){list.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
-  list.innerHTML=filtered.map(g=>{
+
+  function gameCard(g){
     const dev=getDevice(g.device);
     const sub=g.platform?`${dev?dev.name:'?'} · ${g.platform}`:dev?dev.name:'?';
     return `<div class="game-row" onclick="openDetail('${g.id}')">
@@ -422,7 +490,38 @@ function renderGames(){
       <div class="game-info"><div class="game-title">${g.title}</div><div class="game-meta">${sub}</div></div>
       <div class="game-right"><span class="badge ${statusClass[g.status]}">${statusLabel[g.status]}</span><span class="time-lbl">${g.time>0?Math.round(g.time)+'h':'—'}</span></div>
     </div>`;
-  }).join('');
+  }
+
+  if(!groupBy){
+    list.innerHTML=`<div class="game-list">${filtered.map(gameCard).join('')}</div>`;
+    return;
+  }
+
+  if(groupBy==='status'){
+    const order=['inprogress','notstarted','done'];
+    const icons={inprogress:'🕹️',notstarted:'📋',done:'✅'};
+    let html='';
+    order.forEach(s=>{
+      const group=filtered.filter(g=>g.status===s);
+      if(!group.length)return;
+      html+=`<div class="group-title">${icons[s]} ${statusLabel[s]} (${group.length})</div>`;
+      html+=`<div class="game-list" style="margin-bottom:8px">${group.map(gameCard).join('')}</div>`;
+    });
+    list.innerHTML=html;
+    return;
+  }
+
+  if(groupBy==='console'){
+    // Grouper par plateforme/console
+    const consoles=[...new Set(filtered.map(g=>g.platform||'Autre'))].sort();
+    let html='';
+    consoles.forEach(c=>{
+      const group=filtered.filter(g=>(g.platform||'Autre')===c);
+      html+=`<div class="group-title">🎮 ${c} (${group.length})</div>`;
+      html+=`<div class="game-list" style="margin-bottom:8px">${group.map(gameCard).join('')}</div>`;
+    });
+    list.innerHTML=html;
+  }
 }
 
 function renderDeviceList(){
