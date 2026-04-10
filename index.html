@@ -265,7 +265,10 @@ html,body{
             <option value="done">Terminé</option>
           </select>
         </div>
-        <div class="field"><label>Temps (h)</label><input id="g-time" type="number" min="0" step="1" placeholder="0"></div>
+        <div class="field-row">
+          <div class="field"><label>Heures</label><input id="g-time-h" type="number" min="0" step="1" placeholder="0"></div>
+          <div class="field"><label>Minutes</label><input id="g-time-m" type="number" min="0" max="59" step="1" placeholder="0"></div>
+        </div>
         <div class="field"><label>Note personnelle</label><textarea id="g-note" placeholder="Impressions, avancement…"></textarea></div>
       </div>
       <div class="sheet-actions" style="flex-direction:column;gap:8px">
@@ -314,7 +317,26 @@ html,body{
           </select>
         </div>
         <div id="d-emu-wrap" style="display:none">
-          <div class="field"><label>Consoles émulées (séparées par virgule)</label><input id="d-emulators" type="text" placeholder="NES, SNES, GBA, PS1…"></div>
+          <div class="field">
+            <label>Consoles émulées (sélection multiple)</label>
+            <p style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:6px">Appuyez longuement pour sélectionner plusieurs consoles</p>
+            <select id="d-emulators" multiple style="height:180px;border-radius:10px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-family:var(--font-sans);font-size:14px;width:100%;padding:4px">
+              <option>NES</option><option>SNES</option><option>Nintendo 64</option><option>GameCube</option>
+              <option>Wii</option><option>Wii U</option><option>Nintendo Switch</option>
+              <option>Game Boy</option><option>Game Boy Color</option><option>Game Boy Advance</option>
+              <option>Nintendo DS</option><option>Nintendo 3DS</option><option>Virtual Boy</option>
+              <option>PS1</option><option>PS2</option><option>PS3</option><option>PS4</option><option>PS5</option>
+              <option>PSP</option><option>PS Vita</option>
+              <option>Xbox</option><option>Xbox 360</option><option>Xbox One</option><option>Xbox Series X</option>
+              <option>Master System</option><option>Mega Drive</option><option>Saturn</option><option>Dreamcast</option>
+              <option>Game Gear</option><option>Sega CD</option><option>32X</option>
+              <option>Atari 2600</option><option>Atari 5200</option><option>Atari 7800</option><option>Atari Jaguar</option><option>Atari Lynx</option>
+              <option>PC Engine</option><option>PC-FX</option>
+              <option>Neo Geo</option><option>Neo Geo Pocket</option>
+              <option>Arcade</option><option>3DO</option><option>ColecoVision</option><option>Intellivision</option><option>Odyssey</option>
+              <option>PC</option><option>Mac</option>
+            </select>
+          </div>
         </div>
       </div>
       <div class="sheet-actions" style="flex-direction:column;gap:8px">
@@ -325,13 +347,18 @@ html,body{
     </div>
   </div>
 
-  <!-- SHEET: Import CSV -->
+  <!-- SHEET: Import / Export CSV -->
   <div class="modal-overlay" id="sheet-import">
     <div class="sheet">
       <div class="sheet-handle"></div>
-      <div class="sheet-title">Importer des jeux (CSV)</div>
+      <div class="sheet-title">Import / Export CSV</div>
       <div class="sheet-body">
-        <p style="font-size:12px;color:var(--color-text-secondary);margin-bottom:14px">Colonnes attendues :<br><code>titre, appareil, plateforme, etat, temps, note</code><br><br>Les valeurs d'état acceptées : <code>terminé</code>, <code>en cours</code>, <code>pas commencé</code></p>
+        <div class="section-title" style="margin-top:0">📤 Exporter</div>
+        <p style="font-size:12px;color:var(--color-text-secondary);margin-bottom:10px">Télécharge un fichier CSV avec tous tes jeux et appareils.</p>
+        <button class="btn btn-primary btn-full" onclick="exportCSV()" style="margin-bottom:20px">Exporter mes jeux en CSV</button>
+
+        <div class="section-title">📥 Importer</div>
+        <p style="font-size:12px;color:var(--color-text-secondary);margin-bottom:14px">Colonnes attendues :<br><code>titre, appareil, plateforme, etat, temps, note</code><br><br>États acceptés : <code>terminé</code>, <code>en cours</code>, <code>pas commencé</code></p>
         <div class="import-zone" onclick="document.getElementById('csv-file').click()">
           Appuyer pour choisir un fichier .csv
           <input type="file" id="csv-file" accept=".csv" style="display:none" onchange="handleCSV(event)">
@@ -340,7 +367,7 @@ html,body{
       </div>
       <div class="sheet-actions" style="flex-direction:column;gap:8px">
         <button class="btn btn-primary btn-full" id="btn-confirm-import" style="display:none" onclick="confirmImport()">Importer</button>
-        <button class="btn btn-full" onclick="closeSheet('sheet-import')">Annuler</button>
+        <button class="btn btn-full" onclick="closeSheet('sheet-import')">Fermer</button>
       </div>
     </div>
   </div>
@@ -475,7 +502,7 @@ function renderGames(){
   });
   const total=games.length,done=games.filter(g=>g.status==='done').length,hrs=games.reduce((s,g)=>s+(g.time||0),0);
   const ls=document.getElementById('lib-stats');
-  if(ls)ls.textContent=`${total} jeu${total!==1?'x':''} · ${done} terminé${done!==1?'s':''} · ${Math.round(hrs)}h`;
+  if(ls)ls.textContent=`${total} jeu${total!==1?'x':''} · ${done} terminé${done!==1?'s':''} · ${formatTime(hrs)}`;
   const list=document.getElementById('game-list');
   const empty=document.getElementById('empty-lib');
   if(!list)return;
@@ -488,7 +515,7 @@ function renderGames(){
     return `<div class="game-row" onclick="openDetail('${g.id}')">
       <div class="game-icon" style="background:${coverBg(g.title)}">${coverFor(g.title)}</div>
       <div class="game-info"><div class="game-title">${g.title}</div><div class="game-meta">${sub}</div></div>
-      <div class="game-right"><span class="badge ${statusClass[g.status]}">${statusLabel[g.status]}</span><span class="time-lbl">${g.time>0?Math.round(g.time)+'h':'—'}</span></div>
+      <div class="game-right"><span class="badge ${statusClass[g.status]}">${statusLabel[g.status]}</span><span class="time-lbl">${formatTime(g.time)}</span></div>
     </div>`;
   }
 
@@ -564,7 +591,7 @@ function renderStats(){
   el.innerHTML=`
     <div class="stat-grid">
       <div class="stat-card"><div class="lbl">Total jeux</div><div class="val">${total}</div></div>
-      <div class="stat-card"><div class="lbl">Heures jouées</div><div class="val">${Math.round(hrs)}</div></div>
+      <div class="stat-card"><div class="lbl">Heures jouées</div><div class="val">${formatTime(hrs)}</div></div>
       <div class="stat-card"><div class="lbl">Terminés</div><div class="val">${done}</div><div class="sub">${pct}% de la biblio</div></div>
       <div class="stat-card"><div class="lbl">En cours</div><div class="val">${inprog}</div></div>
     </div>
@@ -585,7 +612,7 @@ function renderStats(){
     ${byDevice.length>0?`<div class="section-title">Par appareil</div>`+byDevice.map(d=>`
       <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:13px">
         <span style="color:var(--color-text-primary)">${d.name}</span>
-        <span style="color:var(--color-text-secondary)">${d.count} jeux · ${Math.round(d.hrs)}h</span>
+        <span style="color:var(--color-text-secondary)">${d.count} jeux · ${formatTime(d.hrs)}</span>
       </div>`).join(''):''}
   `;
 }
@@ -594,7 +621,8 @@ function openAddGame(){
   editingId=null;
   document.getElementById('sheet-game-title').textContent='Ajouter un jeu';
   document.getElementById('g-title').value='';
-  document.getElementById('g-time').value='';
+  document.getElementById('g-time-h').value='';
+  document.getElementById('g-time-m').value='';
   document.getElementById('g-note').value='';
   document.getElementById('g-status').value='notstarted';
   populateDeviceSelect();
@@ -619,7 +647,9 @@ function saveGame(){
   const title=document.getElementById('g-title').value.trim();
   if(!title){alert('Le titre est requis.');return;}
   const devId=document.getElementById('g-device').value;
-  const data={title,device:devId,platform:document.getElementById('g-platform').value,status:document.getElementById('g-status').value,time:parseFloat(document.getElementById('g-time').value)||0,note:document.getElementById('g-note').value.trim()};
+  const h=parseFloat(document.getElementById('g-time-h').value)||0;
+  const m=parseFloat(document.getElementById('g-time-m').value)||0;
+  const data={title,device:devId,platform:document.getElementById('g-platform').value,status:document.getElementById('g-status').value,time:h+(m/60),note:document.getElementById('g-note').value.trim()};
   if(editingId){Object.assign(games.find(g=>g.id===editingId),data);}
   else{games.push({id:uid(),...data});}
   closeSheet('sheet-game');
@@ -636,7 +666,7 @@ function openDetail(id){
   document.getElementById('det-title').textContent=g.title;
   document.getElementById('det-sub').textContent=dev?dev.name:'?';
   document.getElementById('det-status-v').innerHTML=`<span class="badge ${statusClass[g.status]}">${statusLabel[g.status]}</span>`;
-  document.getElementById('det-time-v').textContent=g.time>0?Math.round(g.time)+'h':'—';
+  document.getElementById('det-time-v').textContent=formatTime(g.time);
   document.getElementById('det-plat-v').textContent=g.platform||'—';
   document.getElementById('det-note').textContent=g.note||'Aucune note.';
   openSheet('sheet-detail');
@@ -652,7 +682,10 @@ function editFromDetail(){
   onDeviceChange();
   document.getElementById('g-platform').value=g.platform;
   document.getElementById('g-status').value=g.status;
-  document.getElementById('g-time').value=g.time||'';
+  const gh=Math.floor(g.time||0);
+  const gm=Math.round(((g.time||0)-gh)*60);
+  document.getElementById('g-time-h').value=gh||'';
+  document.getElementById('g-time-m').value=gm||'';
   document.getElementById('g-note').value=g.note||'';
   openSheet('sheet-game');
 }
@@ -672,7 +705,7 @@ function openAddDevice(){
   document.getElementById('sheet-device-title').textContent='Ajouter un appareil';
   document.getElementById('d-name').value='';
   document.getElementById('d-type').value='pc';
-  document.getElementById('d-emulators').value='';
+  Array.from(document.getElementById('d-emulators').options).forEach(o=>o.selected=false);
   document.getElementById('d-emu-wrap').style.display='none';
   document.getElementById('btn-delete-device').style.display='none';
   openSheet('sheet-device');
@@ -684,7 +717,8 @@ function openDeviceDetail(id){
   document.getElementById('sheet-device-title').textContent='Modifier l\'appareil';
   document.getElementById('d-name').value=d.name;
   document.getElementById('d-type').value=d.type;
-  document.getElementById('d-emulators').value=d.emulators.join(', ');
+  const emuSel=document.getElementById('d-emulators');
+  Array.from(emuSel.options).forEach(o=>o.selected=d.emulators.includes(o.value));
   document.getElementById('d-emu-wrap').style.display=d.type==='emulator'?'block':'none';
   document.getElementById('btn-delete-device').style.display='block';
   openSheet('sheet-device');
@@ -694,7 +728,7 @@ function saveDevice(){
   const name=document.getElementById('d-name').value.trim();
   if(!name){alert('Le nom est requis.');return;}
   const type=document.getElementById('d-type').value;
-  const emulators=type==='emulator'?document.getElementById('d-emulators').value.split(',').map(s=>s.trim()).filter(Boolean):[];
+  const emulators=type==='emulator'?Array.from(document.getElementById('d-emulators').selectedOptions).map(o=>o.value):[];
   if(editingDeviceId){
     const d=devices.find(x=>x.id===editingDeviceId);
     d.name=name;d.type=type;d.emulators=emulators;
@@ -716,6 +750,40 @@ function deleteDevice(){
     save();
     renderAll();
   });
+}
+
+function formatTime(hours){
+  if(!hours||hours<=0)return '—';
+  const h=Math.floor(hours);
+  const m=Math.round((hours-h)*60);
+  if(h===0)return `${m}min`;
+  if(m===0)return `${h}h`;
+  return `${h}h ${m}min`;
+}
+
+function exportCSV(){
+  const statusFr={notstarted:'pas commencé',inprogress:'en cours',done:'terminé'};
+  const header='titre,appareil,plateforme,etat,temps,note';
+  const rows=games.map(g=>{
+    const dev=getDevice(g.device);
+    const titre=`"${(g.title||'').replace(/"/g,'""')}"`;
+    const appareil=`"${(dev?dev.name:'').replace(/"/g,'""')}"`;
+    const plateforme=`"${(g.platform||'').replace(/"/g,'""')}"`;
+    const etat=statusFr[g.status]||'';
+    const temps=g.time||0;
+    const note=`"${(g.note||'').replace(/"/g,'""')}"`;
+    return [titre,appareil,plateforme,etat,temps,note].join(',');
+  });
+  const csv=[header,...rows].join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='ludotheque.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 function openImportSheet(){
