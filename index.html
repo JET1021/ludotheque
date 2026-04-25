@@ -689,14 +689,22 @@ html, body {
         <div class="sheet-body">
           <div class="field"><label>Nom *</label><input id="d-name" type="text" placeholder="Ex: Mon PC Gaming, Raspberry Pi…"></div>
           <div class="field"><label>Type</label>
-            <select id="d-type" onchange="document.getElementById('d-emu-wrap').style.display=this.value==='emulator'?'block':'none'">
+            <select id="d-type" onchange="document.getElementById('d-emu-wrap').style.display=this.value==='emulator'?'block':'none';if(this.value==='emulator')buildEmuChecklist();">
               <option value="pc">PC / Mac</option>
               <option value="emulator">Appareil avec émulateur</option>
             </select>
           </div>
           <div id="d-emu-wrap" style="display:none">
-            <div class="field"><label>Consoles émulées (séparées par virgule)</label>
-              <input id="d-emulators" type="text" placeholder="NES, SNES, GBA, PS1, N64…">
+            <div class="field">
+              <label>Consoles émulées</label>
+              <input id="emu-search" type="text" placeholder="🔍 Filtrer…" oninput="filterEmuList()" style="margin-bottom:8px">
+              <div id="emu-checklist" style="
+                max-height:220px;overflow-y:auto;
+                background:var(--bg3);border:1px solid var(--border);
+                border-radius:var(--radius-sm);padding:6px;
+                display:grid;grid-template-columns:1fr 1fr;gap:2px;
+              "></div>
+              <div style="font-size:10px;color:var(--text3);margin-top:6px" id="emu-selected-label">Aucune console sélectionnée</div>
             </div>
           </div>
         </div>
@@ -1237,11 +1245,110 @@ async function deleteGame(){
 // ══════════════════════════════════════
 // DEVICE CRUD
 // ══════════════════════════════════════
+// ── CONSOLE LIST ──
+const ALL_CONSOLES = [
+  // Nintendo
+  { brand:'Nintendo', name:'NES' }, { brand:'Nintendo', name:'SNES' },
+  { brand:'Nintendo', name:'Nintendo 64' }, { brand:'Nintendo', name:'GameCube' },
+  { brand:'Nintendo', name:'Wii' }, { brand:'Nintendo', name:'Wii U' },
+  { brand:'Nintendo', name:'Switch' },
+  { brand:'Nintendo', name:'Game Boy' }, { brand:'Nintendo', name:'Game Boy Color' },
+  { brand:'Nintendo', name:'Game Boy Advance' }, { brand:'Nintendo', name:'Nintendo DS' },
+  { brand:'Nintendo', name:'Nintendo 3DS' }, { brand:'Nintendo', name:'Virtual Boy' },
+  // Sega
+  { brand:'Sega', name:'Master System' }, { brand:'Sega', name:'Mega Drive' },
+  { brand:'Sega', name:'Saturn' }, { brand:'Sega', name:'Dreamcast' },
+  { brand:'Sega', name:'Game Gear' }, { brand:'Sega', name:'32X' }, { brand:'Sega', name:'CD' },
+  // Sony
+  { brand:'Sony', name:'PlayStation' }, { brand:'Sony', name:'PlayStation 2' },
+  { brand:'Sony', name:'PlayStation 3' }, { brand:'Sony', name:'PlayStation 4' },
+  { brand:'Sony', name:'PSP' }, { brand:'Sony', name:'PS Vita' },
+  // Microsoft
+  { brand:'Microsoft', name:'Xbox' }, { brand:'Microsoft', name:'Xbox 360' },
+  { brand:'Microsoft', name:'Xbox One' },
+  // Atari
+  { brand:'Atari', name:'Atari 2600' }, { brand:'Atari', name:'Atari 5200' },
+  { brand:'Atari', name:'Atari 7800' }, { brand:'Atari', name:'Atari Jaguar' },
+  { brand:'Atari', name:'Atari Lynx' },
+  // NEC
+  { brand:'NEC', name:'PC Engine' }, { brand:'NEC', name:'PC-FX' },
+  // SNK
+  { brand:'SNK', name:'Neo Geo' }, { brand:'SNK', name:'Neo Geo Pocket' },
+  // Autres
+  { brand:'3DO', name:'3DO' }, { brand:'Bandai', name:'WonderSwan' },
+  { brand:'Coleco', name:'ColecoVision' }, { brand:'Mattel', name:'Intellivision' },
+  { brand:'Magnavox', name:'Odyssey 2' }, { brand:'Vectrex', name:'Vectrex' },
+  // Arcade
+  { brand:'Arcade', name:'MAME' }, { brand:'Arcade', name:'FinalBurn Neo' },
+  { brand:'Arcade', name:'Neo Geo CD' },
+  // Ordi rétro
+  { brand:'Ordinateur', name:'Amiga' }, { brand:'Ordinateur', name:'Amstrad CPC' },
+  { brand:'Ordinateur', name:'Commodore 64' }, { brand:'Ordinateur', name:'ZX Spectrum' },
+  { brand:'Ordinateur', name:'MSX' }, { brand:'Ordinateur', name:'DOS' },
+  { brand:'Ordinateur', name:'PC-98' },
+];
+
+let selectedEmulators = new Set();
+
+function buildEmuChecklist(filter=''){
+  const el=document.getElementById('emu-checklist');
+  if(!el) return;
+  const f=filter.toLowerCase();
+  // Group by brand
+  const brands={};
+  ALL_CONSOLES.forEach(c=>{
+    if(f && !c.name.toLowerCase().includes(f) && !c.brand.toLowerCase().includes(f)) return;
+    if(!brands[c.brand]) brands[c.brand]=[];
+    brands[c.brand].push(c.name);
+  });
+  let html='';
+  Object.entries(brands).forEach(([brand, consoles])=>{
+    html+=`<div style="grid-column:1/-1;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;padding:6px 4px 2px">${brand}</div>`;
+    consoles.forEach(name=>{
+      const checked=selectedEmulators.has(name);
+      html+=`<label style="display:flex;align-items:center;gap:7px;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:12px;color:${checked?'var(--accent2)':'var(--text2)'};background:${checked?'var(--accent-bg)':'transparent'}" onclick="toggleEmu('${name.replace(/'/g,"\\'")}',this)">
+        <span style="width:14px;height:14px;border-radius:3px;border:1px solid ${checked?'var(--accent)':'var(--border2)'};background:${checked?'var(--accent)':'transparent'};display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0">${checked?'✓':''}</span>
+        ${name}
+      </label>`;
+    });
+  });
+  el.innerHTML=html||'<div style="color:var(--text3);font-size:12px;padding:8px">Aucun résultat</div>';
+  updateEmuLabel();
+}
+
+function toggleEmu(name, labelEl){
+  if(selectedEmulators.has(name)) selectedEmulators.delete(name);
+  else selectedEmulators.add(name);
+  // update just this label visually
+  const checked=selectedEmulators.has(name);
+  labelEl.style.color=checked?'var(--accent2)':'var(--text2)';
+  labelEl.style.background=checked?'var(--accent-bg)':'transparent';
+  const box=labelEl.querySelector('span');
+  box.style.border=`1px solid ${checked?'var(--accent)':'var(--border2)'}`;
+  box.style.background=checked?'var(--accent)':'transparent';
+  box.textContent=checked?'✓':'';
+  updateEmuLabel();
+}
+
+function updateEmuLabel(){
+  const lbl=document.getElementById('emu-selected-label');
+  if(!lbl) return;
+  const sel=[...selectedEmulators];
+  lbl.textContent=sel.length===0?'Aucune console sélectionnée':`${sel.length} sélectionnée${sel.length>1?'s':''} : ${sel.slice(0,5).join(', ')}${sel.length>5?' …':''}`;
+}
+
+function filterEmuList(){
+  const f=document.getElementById('emu-search')?.value||'';
+  buildEmuChecklist(f);
+}
+
 function openAddDevice(){
   document.getElementById('d-name').value='';
   document.getElementById('d-type').value='pc';
-  document.getElementById('d-emulators').value='';
+  document.getElementById('emu-search').value='';
   document.getElementById('d-emu-wrap').style.display='none';
+  selectedEmulators=new Set();
+  buildEmuChecklist();
   openSheet('sheet-device');
 }
 
@@ -1249,9 +1356,7 @@ async function saveDevice(){
   const name=document.getElementById('d-name').value.trim();
   if(!name){ alert('Le nom est requis.'); return; }
   const type=document.getElementById('d-type').value;
-  const emulators=type==='emulator'
-    ? document.getElementById('d-emulators').value.split(',').map(s=>s.trim()).filter(Boolean)
-    : [];
+  const emulators=type==='emulator' ? [...selectedEmulators] : [];
   devices.push({id:uid(), name, type, emulators});
   closeSheet('sheet-device');
   await save();
