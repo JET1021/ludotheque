@@ -2,437 +2,888 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>Ma Ludothèque</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>GameShelf</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --color-background-primary:#ffffff;
-  --color-background-secondary:#f2f2f7;
-  --color-background-tertiary:#e5e5ea;
-  --color-text-primary:#1c1c1e;
-  --color-text-secondary:#6c6c70;
-  --color-text-tertiary:#aeaeb2;
-  --color-border-secondary:#d1d1d6;
-  --color-border-tertiary:#e5e5ea;
-  --font-sans:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;
-}
-@media(prefers-color-scheme:dark){
-  :root{
-    --color-background-primary:#1c1c1e;
-    --color-background-secondary:#2c2c2e;
-    --color-background-tertiary:#3a3a3c;
-    --color-text-primary:#ffffff;
-    --color-text-secondary:#aeaeb2;
-    --color-text-tertiary:#636366;
-    --color-border-secondary:#38383a;
-    --color-border-tertiary:#2c2c2e;
-  }
-}
-html,body{
-  height:100%;
-  width:100%;
-  overflow:hidden;
-  font-family:var(--font-sans);
-  background:var(--color-background-primary);
-  -webkit-text-size-adjust:100%;
-}
-.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
-
-/* Layout principal plein écran */
-.app{
-  width:100%;
-  height:100%;
-  height:100dvh;
-  display:flex;
-  flex-direction:column;
-  background:var(--color-background-primary);
-  padding-top:env(safe-area-inset-top);
-  padding-bottom:env(safe-area-inset-bottom);
+:root {
+  --bg: #0e0e11;
+  --bg2: #16161b;
+  --bg3: #1e1e25;
+  --bg4: #26262f;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --text: #f0f0f5;
+  --text2: #9090a0;
+  --text3: #5a5a6a;
+  --accent: #7c6af7;
+  --accent2: #a593ff;
+  --accent-bg: rgba(124,106,247,0.15);
+  --green: #4ade80;
+  --green-bg: rgba(74,222,128,0.12);
+  --amber: #fbbf24;
+  --amber-bg: rgba(251,191,36,0.12);
+  --red: #f87171;
+  --red-bg: rgba(248,113,113,0.12);
+  --steam: #1b9ae0;
+  --epic: #2a9d8f;
+  --gog: #8a3faf;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
 }
 
-.screen{flex:1;overflow:hidden;display:flex;flex-direction:column;position:relative}
-.view{display:none;flex-direction:column;flex:1;overflow:hidden}
-.view.active{display:flex}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-.topnav{padding:10px 16px 12px;border-bottom:0.5px solid var(--color-border-tertiary)}
-.topnav-row{display:flex;align-items:center;justify-content:space-between}
-.topnav h1{font-size:18px;font-weight:500;color:var(--color-text-primary)}
-.topnav p{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
-.icon-btn{width:32px;height:32px;border-radius:50%;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--color-text-primary)}
-.icon-btn:active{opacity:0.7}
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  height: 100%;
+  overflow: hidden;
+}
 
-.scrollable{flex:1;overflow-y:auto;padding:12px 16px 80px;-webkit-overflow-scrolling:touch}
+/* ── PHONE SHELL ── */
+#app {
+  width: 100%;
+  max-width: 420px;
+  height: 100dvh;
+  max-height: 900px;
+  margin: 0 auto;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
 
-.device-tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 16px 8px;border-bottom:0.5px solid var(--color-border-tertiary)}
-.device-tabs::-webkit-scrollbar{display:none}
-.dtab{padding:5px 12px;border-radius:16px;font-size:12px;white-space:nowrap;cursor:pointer;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);color:var(--color-text-secondary);font-family:var(--font-sans)}
-.dtab.active{background:#EEEDFE;border-color:#AFA9EC;color:#3C3489;font-weight:500}
+/* ── STATUS BAR ── */
+.statusbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px 4px;
+  flex-shrink: 0;
+}
+.statusbar-time { font-family: var(--font-display); font-size: 13px; font-weight: 600; }
+.statusbar-icons { font-size: 11px; color: var(--text2); display: flex; gap: 6px; }
 
-.search-bar{display:flex;gap:8px;padding:10px 16px 6px}
-.search-bar input{flex:1;padding:8px 12px;border-radius:20px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-family:var(--font-sans);font-size:13px}
-.search-bar select{padding:8px 8px;border-radius:20px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-family:var(--font-sans);font-size:12px}
+/* ── SCREENS ── */
+.screen { flex: 1; overflow: hidden; display: flex; flex-direction: column; position: relative; }
+.view { display: none; flex-direction: column; height: 100%; }
+.view.active { display: flex; }
 
-.game-list{display:flex;flex-direction:column;gap:8px}
-.game-row{display:flex;align-items:center;gap:12px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:14px;padding:10px 12px;cursor:pointer}
-.game-row:active{background:var(--color-background-secondary)}
-.game-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-.game-info{flex:1;min-width:0}
-.game-title{font-size:14px;font-weight:500;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.game-meta{font-size:11px;color:var(--color-text-secondary);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.game-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
-.badge{padding:2px 7px;border-radius:8px;font-size:10px;font-weight:500}
-.s-done{background:#EAF3DE;color:#27500A}
-.s-inprogress{background:#FAEEDA;color:#633806}
-.s-notstarted{background:#F1EFE8;color:#444441}
-.time-lbl{font-size:10px;color:var(--color-text-tertiary)}
+/* ── TOP NAV ── */
+.topnav {
+  padding: 10px 18px 12px;
+  flex-shrink: 0;
+}
+.topnav-row { display: flex; align-items: flex-end; justify-content: space-between; }
+.topnav h1 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text);
+}
+.topnav .sub { font-size: 12px; color: var(--text3); margin-top: 1px; }
+.top-actions { display: flex; gap: 8px; }
+.icon-btn {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--text);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background 0.15s;
+}
+.icon-btn:active { background: var(--bg4); }
 
-.empty-state{text-align:center;padding:3rem 1rem;color:var(--color-text-secondary);font-size:13px}
-.empty-icon{font-size:36px;margin-bottom:10px}
+/* ── DEVICE TABS ── */
+.device-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 0 18px 10px;
+  flex-shrink: 0;
+  scrollbar-width: none;
+}
+.device-tabs::-webkit-scrollbar { display: none; }
+.dtab {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text2);
+  font-family: var(--font-body);
+  transition: all 0.15s;
+}
+.dtab.active {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  color: var(--accent2);
+}
 
-.bottom-nav{display:flex;border-top:0.5px solid var(--color-border-tertiary);padding:8px 0 4px;background:var(--color-background-primary);padding-bottom:max(4px, env(safe-area-inset-bottom))}
-.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0}
-.bnav-icon{font-size:20px}
-.bnav-label{font-size:10px;color:var(--color-text-secondary);font-family:var(--font-sans)}
-.bnav-item.active .bnav-label{color:#534AB7;font-weight:500}
+/* ── SEARCH ── */
+.search-row {
+  display: flex;
+  gap: 8px;
+  padding: 0 18px 10px;
+  flex-shrink: 0;
+}
+.search-input {
+  flex: 1;
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13px;
+}
+.search-input::placeholder { color: var(--text3); }
+.filter-sel {
+  padding: 8px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text2);
+  font-family: var(--font-body);
+  font-size: 11px;
+}
 
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
-.stat-card{background:var(--color-background-secondary);border-radius:12px;padding:12px}
-.stat-card .lbl{font-size:11px;color:var(--color-text-secondary)}
-.stat-card .val{font-size:22px;font-weight:500;color:var(--color-text-primary);margin-top:2px}
-.stat-card .sub{font-size:10px;color:var(--color-text-tertiary);margin-top:1px}
+/* ── GAME LIST ── */
+.scrollable {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 18px 90px;
+  scrollbar-width: none;
+}
+.scrollable::-webkit-scrollbar { display: none; }
 
-.section-title{font-size:13px;font-weight:500;color:var(--color-text-secondary);margin:16px 0 8px;text-transform:uppercase;letter-spacing:.04em}
-.device-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
-.device-card:active{background:var(--color-background-secondary)}
-.device-card-left{display:flex;align-items:center;gap:10px}
-.device-avatar{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
-.device-name{font-size:14px;font-weight:500;color:var(--color-text-primary)}
-.device-sub{font-size:11px;color:var(--color-text-secondary)}
-.device-count{font-size:12px;color:var(--color-text-secondary)}
-.chevron{font-size:14px;color:var(--color-text-tertiary)}
+.game-list { display: flex; flex-direction: column; gap: 8px; }
 
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:flex-end}
-.modal-overlay.open{display:flex}
-.sheet{background:var(--color-background-primary);border-radius:20px 20px 0 0;width:100%;padding:0 0 24px;max-height:92%;overflow-y:auto;padding-bottom:max(24px, env(safe-area-inset-bottom))}
-.sheet-handle{width:36px;height:4px;background:var(--color-border-secondary);border-radius:2px;margin:10px auto 14px}
-.sheet-title{font-size:16px;font-weight:500;padding:0 16px 14px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary)}
-.sheet-body{padding:16px}
-.field{margin-bottom:14px}
-.field label{display:block;font-size:12px;color:var(--color-text-secondary);margin-bottom:5px}
-.field input,.field select,.field textarea{width:100%;padding:9px 12px;border-radius:10px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-family:var(--font-sans);font-size:16px}
-.field textarea{resize:vertical;min-height:70px}
-.field-row{display:flex;gap:10px}
-.field-row .field{flex:1}
-.sheet-actions{display:flex;gap:10px;padding:0 16px}
-.btn{padding:10px 16px;border-radius:12px;font-size:14px;cursor:pointer;font-family:var(--font-sans);border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary)}
-.btn-full{width:100%}
-.btn-primary{background:#7F77DD;border-color:#534AB7;color:#EEEDFE}
-.btn-primary:active{opacity:.85}
-.btn-danger{background:#FCEBEB;border-color:#F09595;color:#791F1F}
+.game-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.game-row:active { background: var(--bg3); border-color: var(--border2); }
 
-.detail-cover{width:72px;height:72px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 12px}
-.detail-info{text-align:center;margin-bottom:16px}
-.detail-info h2{font-size:18px;font-weight:500;color:var(--color-text-primary)}
-.detail-info p{font-size:13px;color:var(--color-text-secondary);margin-top:3px}
-.detail-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}
-.dstat{background:var(--color-background-secondary);border-radius:10px;padding:10px 8px;text-align:center}
-.dstat .dval{font-size:13px;font-weight:500;color:var(--color-text-primary)}
-.dstat .dlbl{font-size:10px;color:var(--color-text-secondary);margin-top:2px}
-.note-box{background:var(--color-background-secondary);border-radius:10px;padding:12px;font-size:13px;color:var(--color-text-secondary);min-height:48px;margin-bottom:16px}
+.game-cover {
+  width: 52px; height: 52px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--bg3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  overflow: hidden;
+}
+.game-cover img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
 
-.save-indicator{font-size:10px;color:var(--color-text-tertiary);text-align:center;padding:4px 0}
+.game-info { flex: 1; min-width: 0; }
+.game-title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.game-meta { font-size: 11px; color: var(--text3); margin-top: 2px; display: flex; align-items: center; gap: 5px; }
+.src-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
+.src-steam { background: var(--steam); }
+.src-epic { background: var(--epic); }
+.src-gog { background: var(--gog); }
+.src-manual { background: var(--text3); }
 
-.import-zone{border:0.5px dashed var(--color-border-secondary);border-radius:12px;padding:24px 16px;text-align:center;color:var(--color-text-secondary);font-size:13px;cursor:pointer;margin-bottom:14px}
-.import-zone:active{background:var(--color-background-secondary)}
+.game-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+.badge {
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.s-done { background: var(--green-bg); color: var(--green); }
+.s-inprogress { background: var(--amber-bg); color: var(--amber); }
+.s-notstarted { background: var(--bg4); color: var(--text2); }
+.time-lbl { font-size: 10px; color: var(--text3); }
 
-.filter-bar{display:flex;gap:8px;padding:6px 16px 8px;border-bottom:0.5px solid var(--color-border-tertiary)}
-.filter-group{display:flex;flex-direction:column;gap:3px;flex:1}
-.filter-label{font-size:10px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.04em}
-.filter-group select{padding:6px 8px;border-radius:10px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-family:var(--font-sans);font-size:12px}
+/* ── EMPTY ── */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text3);
+  font-size: 13px;
+}
+.empty-icon { font-size: 40px; margin-bottom: 12px; }
 
-.group-title{font-size:12px;font-weight:600;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.05em;padding:14px 0 6px;margin:0}
+/* ── FAB ── */
+.fab {
+  position: absolute;
+  bottom: 80px; right: 18px;
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 20px rgba(124,106,247,0.4);
+  transition: transform 0.15s;
+  font-family: var(--font-body);
+}
+.fab:active { transform: scale(0.94); }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  display: flex;
+  border-top: 1px solid var(--border);
+  padding: 10px 0 20px;
+  background: var(--bg);
+  flex-shrink: 0;
+}
+.bnav-item {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  cursor: pointer; padding: 4px 0;
+}
+.bnav-icon { font-size: 18px; }
+.bnav-label { font-size: 10px; color: var(--text3); font-family: var(--font-body); }
+.bnav-item.active .bnav-label { color: var(--accent2); font-weight: 500; }
+
+/* ── STAT CARDS ── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.stat-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+.stat-card .lbl { font-size: 11px; color: var(--text3); }
+.stat-card .val {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 2px;
+  letter-spacing: -1px;
+}
+.stat-card .sub { font-size: 10px; color: var(--text3); margin-top: 2px; }
+.section-title {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin: 18px 0 10px;
+}
+
+/* ── DEVICE CARDS ── */
+.device-card {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.device-card:active { border-color: var(--border2); }
+.device-card-left { display: flex; align-items: center; gap: 12px; }
+.device-avatar {
+  width: 42px; height: 42px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+  background: var(--bg3);
+}
+.device-name { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--text); }
+.device-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.device-count { font-size: 11px; color: var(--text3); margin-right: 6px; }
+.chevron { font-size: 14px; color: var(--text3); }
+
+/* ── SHEETS ── */
+.modal-overlay {
+  display: none;
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 100;
+  align-items: flex-end;
+}
+.modal-overlay.open { display: flex; }
+
+.sheet {
+  background: var(--bg2);
+  border-radius: 22px 22px 0 0;
+  border-top: 1px solid var(--border2);
+  width: 100%;
+  max-height: 92%;
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding-bottom: 28px;
+}
+.sheet::-webkit-scrollbar { display: none; }
+.sheet-handle {
+  width: 36px; height: 4px;
+  background: var(--border2);
+  border-radius: 2px;
+  margin: 12px auto 14px;
+}
+.sheet-title {
+  font-family: var(--font-display);
+  font-size: 16px; font-weight: 700;
+  padding: 0 18px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+.sheet-body { padding: 16px 18px; }
+
+/* ── FORM ── */
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 11px; color: var(--text3); margin-bottom: 5px; letter-spacing: 0.04em; text-transform: uppercase; }
+.field input, .field select, .field textarea {
+  width: 100%; padding: 10px 13px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+.field input::placeholder { color: var(--text3); }
+.field textarea { resize: vertical; min-height: 70px; }
+.field-row { display: flex; gap: 10px; }
+.field-row .field { flex: 1; }
+
+.btn {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font-body);
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--text);
+  transition: background 0.15s;
+}
+.btn:active { background: var(--bg4); }
+.btn-full { width: 100%; margin-bottom: 8px; }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-primary:active { background: #6a59e0; }
+.btn-danger { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+.btn-steam { background: rgba(27,154,224,0.15); border-color: var(--steam); color: #5ec8ff; }
+.btn-epic { background: rgba(42,157,143,0.15); border-color: var(--epic); color: #5ee0d0; }
+.btn-gog { background: rgba(138,63,175,0.15); border-color: var(--gog); color: #c893f5; }
+
+/* ── DETAIL SHEET ── */
+.detail-hero {
+  width: 90px; height: 90px;
+  border-radius: 18px;
+  margin: 0 auto 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px;
+  overflow: hidden;
+  background: var(--bg3);
+}
+.detail-hero img { width: 100%; height: 100%; object-fit: cover; }
+.detail-info { text-align: center; margin-bottom: 16px; }
+.detail-info h2 {
+  font-family: var(--font-display);
+  font-size: 18px; font-weight: 800;
+  letter-spacing: -0.3px;
+  color: var(--text);
+}
+.detail-info p { font-size: 12px; color: var(--text3); margin-top: 4px; }
+.detail-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.dstat {
+  background: var(--bg3);
+  border-radius: 10px;
+  padding: 10px 8px;
+  text-align: center;
+}
+.dstat .dval { font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--text); }
+.dstat .dlbl { font-size: 10px; color: var(--text3); margin-top: 2px; }
+.note-box {
+  background: var(--bg3);
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 13px;
+  color: var(--text2);
+  min-height: 48px;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+/* ── STEAM IMPORT SHEET ── */
+.steam-logo {
+  font-family: var(--font-display);
+  font-size: 24px; font-weight: 800;
+  color: var(--steam);
+  margin-bottom: 6px;
+}
+.import-info {
+  font-size: 12px; color: var(--text3);
+  line-height: 1.6; margin-bottom: 16px;
+}
+.import-result {
+  background: var(--bg3);
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 12px;
+  color: var(--text2);
+  margin-bottom: 14px;
+  max-height: 140px;
+  overflow-y: auto;
+}
+.import-game-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.import-game-row:last-child { border: none; }
+.import-game-row img {
+  width: 36px; height: 27px;
+  border-radius: 4px; object-fit: cover;
+  background: var(--bg4);
+}
+.import-game-row .iname { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+.import-game-row .itime { font-size: 10px; color: var(--text3); flex-shrink: 0; }
+
+.drop-zone {
+  border: 1px dashed var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 20px;
+  text-align: center;
+  color: var(--text3);
+  font-size: 13px;
+  cursor: pointer;
+  margin-bottom: 14px;
+  transition: border-color 0.15s;
+}
+.drop-zone:active { border-color: var(--accent); }
+
+/* ── PROGRESS BARS ── */
+.prog-row { margin-bottom: 12px; }
+.prog-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
+.prog-label span:first-child { color: var(--text2); }
+.prog-label span:last-child { color: var(--text3); }
+.prog-bar {
+  height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden;
+}
+.prog-fill { height: 100%; border-radius: 3px; }
+
+/* ── SAVE LABEL ── */
+.save-indicator { font-size: 10px; color: var(--text3); text-align: center; padding: 3px 0; flex-shrink: 0; }
+
+/* ── PLATFORM SOURCE LEGEND ── */
+.source-legend { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.src-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text3); }
+
+/* ── COVER PICKER ── */
+.cover-preview {
+  width: 64px; height: 64px; border-radius: 10px;
+  background: var(--bg3); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; overflow: hidden; cursor: pointer;
+  flex-shrink: 0;
+}
+.cover-preview img { width: 100%; height: 100%; object-fit: cover; }
+.cover-row { display: flex; gap: 10px; align-items: flex-start; }
+.cover-row .field { flex: 1; }
+
+/* ── SEARCH RESULTS ── */
+.cover-results { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 8px; scrollbar-width: none; }
+.cover-results::-webkit-scrollbar { display: none; }
+.cover-opt {
+  width: 54px; height: 54px; border-radius: 8px; flex-shrink: 0;
+  object-fit: cover; cursor: pointer; border: 2px solid transparent;
+  background: var(--bg3);
+}
+.cover-opt.selected { border-color: var(--accent); }
 </style>
 </head>
 <body>
+<div id="app">
 
-<div class="app">
-<div class="screen">
+  <div class="statusbar">
+    <span id="clock" style="font-family:var(--font-display);font-size:13px;font-weight:600">09:41</span>
+    <div class="statusbar-icons"><span>●●●</span> <span>WiFi</span> <span>🔋</span></div>
+  </div>
 
-  <!-- VIEW: Bibliothèque -->
-  <div class="view active" id="view-library">
-    <div class="topnav">
-      <div class="topnav-row">
-        <div><h1>Ma bibliothèque</h1><p id="lib-stats">Chargement…</p></div>
-        <div style="display:flex;gap:8px">
-          <div class="icon-btn" onclick="openImportSheet()" title="Importer CSV">↑</div>
-          <div class="icon-btn" onclick="openAddGame()" title="Ajouter">+</div>
+  <div class="screen">
+
+    <!-- ══ VIEW: LIBRARY ══ -->
+    <div class="view active" id="view-library">
+      <div class="topnav">
+        <div class="topnav-row">
+          <div>
+            <h1>GameShelf</h1>
+            <div class="sub" id="lib-stats">Chargement…</div>
+          </div>
+          <div class="top-actions">
+            <div class="icon-btn" title="Importer" onclick="openImportMenu()">⊕</div>
+            <div class="icon-btn" title="Ajouter manuellement" onclick="openAddGame()">+</div>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="device-tabs" id="device-tabs"></div>
-    <div class="search-bar">
-      <input type="text" id="search" placeholder="Rechercher…" oninput="renderGames()">
-    </div>
-    <div class="filter-bar">
-      <div class="filter-group">
-        <span class="filter-label">État</span>
-        <select id="filter-status" onchange="renderGames()">
+      <div class="device-tabs" id="device-tabs"></div>
+      <div class="search-row">
+        <input class="search-input" id="search" placeholder="🔍  Rechercher…" oninput="renderGames()">
+        <select class="filter-sel" id="filter-status" onchange="renderGames()">
           <option value="">Tous</option>
           <option value="notstarted">À faire</option>
           <option value="inprogress">En cours</option>
           <option value="done">Terminé</option>
         </select>
       </div>
-      <div class="filter-group">
-        <span class="filter-label">Console</span>
-        <select id="filter-console" onchange="renderGames()">
-          <option value="">Toutes</option>
-        </select>
+      <div class="scrollable">
+        <div class="game-list" id="game-list"></div>
+        <div class="empty-state" id="empty-lib" style="display:none">
+          <div class="empty-icon">🎮</div>
+          <div>Aucun jeu.<br>Utilisez ⊕ pour importer ou + pour ajouter.</div>
+        </div>
       </div>
-      <div class="filter-group">
-        <span class="filter-label">Grouper</span>
-        <select id="group-by" onchange="renderGames()">
-          <option value="">Aucun</option>
-          <option value="status">Par état</option>
-          <option value="console">Par console</option>
-        </select>
-      </div>
+      <div class="save-indicator" id="save-label"></div>
+      <div class="bottom-nav" id="bnav-lib"></div>
     </div>
-    <div class="scrollable">
-      <div class="game-list" id="game-list"></div>
-      <div class="empty-state" id="empty-lib" style="display:none">
-        <div class="empty-icon">🎮</div>
-        <div>Aucun jeu ici.<br>Appuyez sur + pour en ajouter.</div>
-      </div>
-    </div>
-    <div class="save-indicator" id="save-label"></div>
-    <div class="bottom-nav" id="bnav-lib"></div>
-  </div>
 
-  <!-- VIEW: Appareils -->
-  <div class="view" id="view-devices">
-    <div class="topnav">
-      <div class="topnav-row">
-        <div><h1>Appareils</h1><p id="dev-stats"></p></div>
-        <div class="icon-btn" onclick="openAddDevice()">+</div>
+    <!-- ══ VIEW: DEVICES ══ -->
+    <div class="view" id="view-devices">
+      <div class="topnav">
+        <div class="topnav-row">
+          <div><h1>Appareils</h1><div class="sub" id="dev-sub"></div></div>
+          <div class="icon-btn" onclick="openAddDevice()">+</div>
+        </div>
       </div>
-    </div>
-    <div class="scrollable">
-      <div id="device-list"></div>
-      <div class="empty-state" id="empty-dev" style="display:none">
-        <div class="empty-icon">🖥️</div>
-        <div>Aucun appareil.<br>Appuyez sur + pour en ajouter.</div>
+      <div class="scrollable" style="padding-top:6px">
+        <div id="device-list"></div>
+        <div class="empty-state" id="empty-dev" style="display:none">
+          <div class="empty-icon">🖥️</div>
+          <div>Aucun appareil enregistré.</div>
+        </div>
       </div>
+      <div class="bottom-nav" id="bnav-dev"></div>
     </div>
-    <div class="bottom-nav" id="bnav-dev"></div>
-  </div>
 
-  <!-- VIEW: Stats -->
-  <div class="view" id="view-stats">
-    <div class="topnav">
-      <div class="topnav-row">
-        <div><h1>Statistiques</h1></div>
+    <!-- ══ VIEW: STATS ══ -->
+    <div class="view" id="view-stats">
+      <div class="topnav">
+        <div class="topnav-row"><div><h1>Statistiques</h1></div></div>
       </div>
+      <div class="scrollable" id="stats-content" style="padding-top:6px"></div>
+      <div class="bottom-nav" id="bnav-stats"></div>
     </div>
-    <div class="scrollable">
-      <div id="stats-content"></div>
-    </div>
-    <div class="bottom-nav" id="bnav-stats"></div>
-  </div>
 
-  <!-- SHEET: Ajouter/Modifier jeu -->
-  <div class="modal-overlay" id="sheet-game">
-    <div class="sheet">
-      <div class="sheet-handle"></div>
-      <div class="sheet-title" id="sheet-game-title">Ajouter un jeu</div>
-      <div class="sheet-body">
-        <div class="field"><label>Titre *</label><input id="g-title" type="text" placeholder="Nom du jeu"></div>
-        <div class="field-row">
-          <div class="field"><label>Appareil</label>
-            <select id="g-device" onchange="onDeviceChange()"></select>
+    <!-- ══ SHEET: Ajouter/Modifier jeu ══ -->
+    <div class="modal-overlay" id="sheet-game">
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-title" id="sheet-game-ttl">Ajouter un jeu</div>
+        <div class="sheet-body">
+          <div class="cover-row">
+            <div>
+              <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px">Pochette</div>
+              <div class="cover-preview" id="cover-preview" onclick="triggerCoverFile()">🎮
+                <input type="file" id="cover-file" accept="image/*" style="display:none" onchange="onCoverFile(event)">
+              </div>
+              <div style="font-size:10px;color:var(--text3);margin-top:4px;text-align:center">Appuyer</div>
+            </div>
+            <div style="flex:1">
+              <div class="field"><label>Titre *</label><input id="g-title" type="text" placeholder="Ex: Hollow Knight" oninput="onTitleInput()"></div>
+              <div id="cover-results-wrap" style="display:none">
+                <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Images trouvées :</div>
+                <div class="cover-results" id="cover-results"></div>
+              </div>
+            </div>
           </div>
-          <div class="field"><label>Plateforme</label>
-            <select id="g-platform"></select>
+          <div class="field-row">
+            <div class="field"><label>Appareil *</label><select id="g-device" onchange="onDeviceChange()"></select></div>
+            <div class="field"><label>Plateforme</label><select id="g-platform"></select></div>
           </div>
+          <div class="field-row">
+            <div class="field"><label>Source</label>
+              <select id="g-source">
+                <option value="manual">Manuel</option>
+                <option value="steam">Steam</option>
+                <option value="epic">Epic Games</option>
+                <option value="gog">GOG</option>
+              </select>
+            </div>
+            <div class="field"><label>Steam App ID</label><input id="g-steamid" type="number" placeholder="ex: 367520"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>État</label>
+              <select id="g-status">
+                <option value="notstarted">À faire</option>
+                <option value="inprogress">En cours</option>
+                <option value="done">Terminé</option>
+              </select>
+            </div>
+            <div class="field"><label>Temps (heures)</label><input id="g-time" type="number" min="0" step="1" placeholder="0"></div>
+          </div>
+          <div class="field"><label>Note personnelle</label><textarea id="g-note" placeholder="Impressions, avancement…"></textarea></div>
         </div>
-        <div class="field"><label>État</label>
-          <select id="g-status">
-            <option value="notstarted">À faire</option>
-            <option value="inprogress">En cours</option>
-            <option value="done">Terminé</option>
-          </select>
+        <div style="padding:0 18px;display:flex;flex-direction:column;gap:8px">
+          <button class="btn btn-primary btn-full" onclick="saveGame()">Enregistrer</button>
+          <button class="btn btn-full" onclick="closeSheet('sheet-game')">Annuler</button>
         </div>
-        <div class="field-row">
-          <div class="field"><label>Heures</label><input id="g-time-h" type="number" min="0" step="1" placeholder="0"></div>
-          <div class="field"><label>Minutes</label><input id="g-time-m" type="number" min="0" max="59" step="1" placeholder="0"></div>
-        </div>
-        <div class="field"><label>Note personnelle</label><textarea id="g-note" placeholder="Impressions, avancement…"></textarea></div>
-      </div>
-      <div class="sheet-actions" style="flex-direction:column;gap:8px">
-        <button class="btn btn-primary btn-full" onclick="saveGame()">Enregistrer</button>
-        <button class="btn btn-full" onclick="closeSheet('sheet-game')">Annuler</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- SHEET: Détail jeu -->
-  <div class="modal-overlay" id="sheet-detail">
-    <div class="sheet">
-      <div class="sheet-handle"></div>
-      <div class="sheet-body">
-        <div class="detail-cover" id="det-cover"></div>
-        <div class="detail-info">
-          <h2 id="det-title"></h2>
-          <p id="det-sub"></p>
-        </div>
-        <div class="detail-stats">
-          <div class="dstat"><div class="dval" id="det-status-v"></div><div class="dlbl">État</div></div>
-          <div class="dstat"><div class="dval" id="det-time-v"></div><div class="dlbl">Temps</div></div>
-          <div class="dstat"><div class="dval" id="det-plat-v"></div><div class="dlbl">Plateforme</div></div>
-        </div>
-        <div class="field"><label>Note personnelle</label><div class="note-box" id="det-note"></div></div>
-      </div>
-      <div class="sheet-actions" style="flex-direction:column;gap:8px">
-        <button class="btn btn-primary btn-full" onclick="editFromDetail()">Modifier</button>
-        <button class="btn btn-danger btn-full" onclick="deleteGame()">Supprimer</button>
-        <button class="btn btn-full" onclick="closeSheet('sheet-detail')">Fermer</button>
       </div>
     </div>
-  </div>
 
-  <!-- SHEET: Ajouter/Modifier appareil -->
-  <div class="modal-overlay" id="sheet-device">
-    <div class="sheet">
-      <div class="sheet-handle"></div>
-      <div class="sheet-title" id="sheet-device-title">Ajouter un appareil</div>
-      <div class="sheet-body">
-        <div class="field"><label>Nom *</label><input id="d-name" type="text" placeholder="Ex: Mon PC, Raspberry Pi…"></div>
-        <div class="field"><label>Type</label>
-          <select id="d-type" onchange="document.getElementById('d-emu-wrap').style.display=this.value==='emulator'?'block':'none'">
-            <option value="pc">PC / Mac</option>
-            <option value="emulator">Appareil avec émulateur</option>
-          </select>
+    <!-- ══ SHEET: Détail jeu ══ -->
+    <div class="modal-overlay" id="sheet-detail">
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-body">
+          <div class="detail-hero" id="det-cover"></div>
+          <div class="detail-info">
+            <h2 id="det-title"></h2>
+            <p id="det-sub"></p>
+          </div>
+          <div class="detail-stats">
+            <div class="dstat"><div class="dval" id="det-status-v"></div><div class="dlbl">État</div></div>
+            <div class="dstat"><div class="dval" id="det-time-v"></div><div class="dlbl">Heures</div></div>
+            <div class="dstat"><div class="dval" id="det-plat-v"></div><div class="dlbl">Plateforme</div></div>
+          </div>
+          <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Note</div>
+          <div class="note-box" id="det-note"></div>
         </div>
-        <div id="d-emu-wrap" style="display:none">
-          <div class="field">
-            <label>Consoles émulées (sélection multiple)</label>
-            <p style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:6px">Appuyez longuement pour sélectionner plusieurs consoles</p>
-            <select id="d-emulators" multiple style="height:180px;border-radius:10px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-family:var(--font-sans);font-size:14px;width:100%;padding:4px">
-              <option>NES</option><option>SNES</option><option>Nintendo 64</option><option>GameCube</option>
-              <option>Wii</option><option>Wii U</option><option>Nintendo Switch</option>
-              <option>Game Boy</option><option>Game Boy Color</option><option>Game Boy Advance</option>
-              <option>Nintendo DS</option><option>Nintendo 3DS</option><option>Virtual Boy</option>
-              <option>PS1</option><option>PS2</option><option>PS3</option><option>PS4</option><option>PS5</option>
-              <option>PSP</option><option>PS Vita</option>
-              <option>Xbox</option><option>Xbox 360</option><option>Xbox One</option><option>Xbox Series X</option>
-              <option>Master System</option><option>Mega Drive</option><option>Saturn</option><option>Dreamcast</option>
-              <option>Game Gear</option><option>Sega CD</option><option>32X</option>
-              <option>Atari 2600</option><option>Atari 5200</option><option>Atari 7800</option><option>Atari Jaguar</option><option>Atari Lynx</option>
-              <option>PC Engine</option><option>PC-FX</option>
-              <option>Neo Geo</option><option>Neo Geo Pocket</option>
-              <option>Arcade</option><option>3DO</option><option>ColecoVision</option><option>Intellivision</option><option>Odyssey</option>
-              <option>PC</option><option>Mac</option>
+        <div style="padding:0 18px;display:flex;flex-direction:column;gap:8px">
+          <button class="btn btn-primary btn-full" onclick="editFromDetail()">✏️  Modifier</button>
+          <button class="btn btn-danger btn-full" onclick="deleteGame()">Supprimer</button>
+          <button class="btn btn-full" onclick="closeSheet('sheet-detail')">Fermer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SHEET: Appareil ══ -->
+    <div class="modal-overlay" id="sheet-device">
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-title">Ajouter un appareil</div>
+        <div class="sheet-body">
+          <div class="field"><label>Nom *</label><input id="d-name" type="text" placeholder="Ex: Mon PC Gaming, Raspberry Pi…"></div>
+          <div class="field"><label>Type</label>
+            <select id="d-type" onchange="document.getElementById('d-emu-wrap').style.display=this.value==='emulator'?'block':'none'">
+              <option value="pc">PC / Mac</option>
+              <option value="emulator">Appareil avec émulateur</option>
             </select>
           </div>
+          <div id="d-emu-wrap" style="display:none">
+            <div class="field"><label>Consoles émulées (séparées par virgule)</label>
+              <input id="d-emulators" type="text" placeholder="NES, SNES, GBA, PS1, N64…">
+            </div>
+          </div>
+        </div>
+        <div style="padding:0 18px;display:flex;flex-direction:column;gap:8px">
+          <button class="btn btn-primary btn-full" onclick="saveDevice()">Enregistrer</button>
+          <button class="btn btn-full" onclick="closeSheet('sheet-device')">Annuler</button>
         </div>
       </div>
-      <div class="sheet-actions" style="flex-direction:column;gap:8px">
-        <button class="btn btn-primary btn-full" onclick="saveDevice()">Enregistrer</button>
-        <button class="btn btn-danger btn-full" id="btn-delete-device" style="display:none" onclick="deleteDevice()">Supprimer l'appareil</button>
-        <button class="btn btn-full" onclick="closeSheet('sheet-device')">Annuler</button>
-      </div>
     </div>
-  </div>
 
-  <!-- SHEET: Import / Export CSV -->
-  <div class="modal-overlay" id="sheet-import">
-    <div class="sheet">
-      <div class="sheet-handle"></div>
-      <div class="sheet-title">Import / Export CSV</div>
-      <div class="sheet-body">
-        <div class="section-title" style="margin-top:0">📤 Exporter</div>
-        <p style="font-size:12px;color:var(--color-text-secondary);margin-bottom:10px">Télécharge un fichier CSV avec tous tes jeux et appareils.</p>
-        <button class="btn btn-primary btn-full" onclick="exportCSV()" style="margin-bottom:20px">Exporter mes jeux en CSV</button>
-
-        <div class="section-title">📥 Importer</div>
-        <p style="font-size:12px;color:var(--color-text-secondary);margin-bottom:14px">Colonnes attendues :<br><code>titre, appareil, plateforme, etat, temps, note</code><br><br>États acceptés : <code>terminé</code>, <code>en cours</code>, <code>pas commencé</code></p>
-        <div class="import-zone" onclick="document.getElementById('csv-file').click()">
-          Appuyer pour choisir un fichier .csv
-          <input type="file" id="csv-file" accept=".csv" style="display:none" onchange="handleCSV(event)">
+    <!-- ══ SHEET: Menu import ══ -->
+    <div class="modal-overlay" id="sheet-import-menu">
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-title">Importer une bibliothèque</div>
+        <div class="sheet-body">
+          <div style="display:grid;gap:10px">
+            <button class="btn btn-steam btn-full" onclick="closeSheet('sheet-import-menu');openSteamImport()" style="text-align:left;font-size:14px">
+              🎮  <strong>Steam</strong> — via votre Steam ID
+            </button>
+            <button class="btn btn-epic btn-full" onclick="closeSheet('sheet-import-menu');openCsvImport('epic')" style="text-align:left;font-size:14px">
+              🕹️  <strong>Epic Games</strong> — importer un fichier CSV
+            </button>
+            <button class="btn btn-gog btn-full" onclick="closeSheet('sheet-import-menu');openCsvImport('gog')" style="text-align:left;font-size:14px">
+              👾  <strong>GOG</strong> — importer un fichier CSV
+            </button>
+          </div>
+          <div style="margin-top:16px;padding:12px;background:var(--bg3);border-radius:10px;font-size:11px;color:var(--text3);line-height:1.6">
+            <strong style="color:var(--text2)">Comment exporter depuis Epic / GOG ?</strong><br>
+            Epic : Paramètres → Données du compte → Exporter<br>
+            GOG : galaxy.certificates.games → exporter CSV<br>
+            Format attendu : <code>titre, plateforme, etat, temps, note</code>
+          </div>
         </div>
-        <div id="import-feedback" style="font-size:13px;color:var(--color-text-secondary);margin-bottom:12px"></div>
-      </div>
-      <div class="sheet-actions" style="flex-direction:column;gap:8px">
-        <button class="btn btn-primary btn-full" id="btn-confirm-import" style="display:none" onclick="confirmImport()">Importer</button>
-        <button class="btn btn-full" onclick="closeSheet('sheet-import')">Fermer</button>
+        <div style="padding:0 18px">
+          <button class="btn btn-full" onclick="closeSheet('sheet-import-menu')">Annuler</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- DIALOG: Confirmation suppression -->
-  <div class="modal-overlay" id="sheet-confirm" style="align-items:center;padding:0 32px">
-    <div style="background:var(--color-background-primary);border-radius:16px;width:100%;padding:20px 16px 12px;text-align:center">
-      <div style="font-size:16px;font-weight:600;color:var(--color-text-primary);margin-bottom:8px" id="confirm-title"></div>
-      <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:20px" id="confirm-message"></div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <button class="btn btn-danger btn-full" id="confirm-ok">Supprimer</button>
-        <button class="btn btn-full" onclick="closeSheet('sheet-confirm')">Annuler</button>
+    <!-- ══ SHEET: Steam import ══ -->
+    <div class="modal-overlay" id="sheet-steam">
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-title">🎮 Importer depuis Steam</div>
+        <div class="sheet-body">
+          <div class="import-info">
+            Entrez votre <strong style="color:var(--text)">Steam ID 64 bits</strong> (ex: 76561198xxxxxxxxx).<br>
+            Votre profil Steam doit être <strong style="color:var(--text)">public</strong> pour que ça fonctionne.<br><br>
+            Où trouver votre Steam ID ? Ouvrez Steam → votre profil → l'URL contient votre ID.
+          </div>
+          <div class="field">
+            <label>Steam ID 64</label>
+            <input id="steam-id" type="text" placeholder="76561198000000000">
+          </div>
+          <div class="field">
+            <label>Appareil cible</label>
+            <select id="steam-device"></select>
+          </div>
+          <div id="steam-result" style="display:none">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em" id="steam-result-label"></div>
+            <div class="import-result" id="steam-game-list"></div>
+          </div>
+          <div id="steam-error" style="display:none;font-size:12px;color:var(--red);margin-bottom:10px;padding:10px;background:var(--red-bg);border-radius:8px"></div>
+        </div>
+        <div style="padding:0 18px;display:flex;flex-direction:column;gap:8px">
+          <button class="btn btn-steam btn-full" id="btn-steam-fetch" onclick="fetchSteamGames()">Récupérer mes jeux</button>
+          <button class="btn btn-primary btn-full" id="btn-steam-import" style="display:none" onclick="confirmSteamImport()">Importer dans la bibliothèque</button>
+          <button class="btn btn-full" onclick="closeSheet('sheet-steam')">Annuler</button>
+        </div>
       </div>
     </div>
-  </div>
 
-</div>
-</div>
+    <!-- ══ SHEET: CSV import ══ -->
+    <div class="modal-overlay" id="sheet-csv">
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-title" id="csv-sheet-title">Importer CSV</div>
+        <div class="sheet-body">
+          <div class="field"><label>Appareil cible</label><select id="csv-device"></select></div>
+          <div class="drop-zone" onclick="document.getElementById('csv-file-input').click()">
+            📂  Appuyer pour choisir un fichier .csv
+            <input type="file" id="csv-file-input" accept=".csv,.txt" style="display:none" onchange="handleCsv(event)">
+          </div>
+          <div class="import-info" style="margin-bottom:10px">
+            Colonnes attendues : <code style="color:var(--accent2)">titre, plateforme, etat, temps, note</code><br>
+            États acceptés : <code>terminé</code>, <code>en cours</code>, <code>pas commencé</code>
+          </div>
+          <div id="csv-result" style="display:none">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:6px" id="csv-result-label"></div>
+            <div class="import-result" id="csv-game-list"></div>
+          </div>
+        </div>
+        <div style="padding:0 18px;display:flex;flex-direction:column;gap:8px">
+          <button class="btn btn-primary btn-full" id="btn-csv-import" style="display:none" onclick="confirmCsvImport()">Importer dans la bibliothèque</button>
+          <button class="btn btn-full" onclick="closeSheet('sheet-csv')">Annuler</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /screen -->
+</div><!-- /app -->
 
 <script>
-let devices=[], games=[], activeTab='all', activeView='library', editingId=null, detailId=null, pendingImport=[];
+// ══════════════════════════════════════
+// DATA
+// ══════════════════════════════════════
+let devices = [], games = [];
+let activeTab = 'all', activeView = 'library';
+let editingId = null, detailId = null;
+let pendingCsvGames = [], pendingCsvSource = 'epic';
+let pendingSteamGames = [];
+let coverDataUrl = null; // base64 for new game cover
+let titleSearchTimer = null;
 
-const statusLabel={notstarted:'À faire', inprogress:'En cours', done:'Terminé'};
-const statusClass={notstarted:'s-notstarted', inprogress:'s-inprogress', done:'s-done'};
-const covers=['🎮','🕹️','⚔️','🏎️','🌍','👾','🧩','🔫','🏆','🐉','🚀','🎯','🎲','🌸','🏰','👑'];
-const coverBgs=['#E6F1FB','#EAF3DE','#FAEEDA','#EEEDFE','#FBEAF0','#E1F5EE','#FAECE7','#F1EFE8'];
+const statusLabel = { notstarted: 'À faire', inprogress: 'En cours', done: 'Terminé' };
+const statusClass = { notstarted: 's-notstarted', inprogress: 's-inprogress', done: 's-done' };
+const covers = ['🎮','🕹️','⚔️','🏎️','🌍','👾','🧩','🔫','🏆','🐉','🚀','🎯','🎲','🌸','🏰','👑'];
+const coverBgs = ['#1a1535','#0f2a1d','#2a1a0f','#1a1a2a','#2a0f1a','#0f2a2a','#1a2a0f','#2a2a0f'];
 
-function hashStr(s){let h=0;for(let c of s)h=(h*31+c.charCodeAt(0))&0xffff;return h;}
-function coverFor(t){return covers[hashStr(t)%covers.length];}
-function coverBg(t){return coverBgs[hashStr(t+'bg')%coverBgs.length];}
-function getDevice(id){return devices.find(d=>d.id===id);}
-function uid(){return 'i'+Date.now()+Math.floor(Math.random()*9999);}
+function hashStr(s){ let h=0; for(let c of s) h=(h*31+c.charCodeAt(0))&0xffff; return h; }
+function coverFor(t){ return covers[hashStr(t)%covers.length]; }
+function coverBgFor(t){ return coverBgs[hashStr(t+'b')%coverBgs.length]; }
+function uid(){ return 'i'+Date.now()+Math.floor(Math.random()*9999); }
+function getDevice(id){ return devices.find(d=>d.id===id); }
 
-// Sauvegarde locale via localStorage (fonctionne dans Safari/Scriptable)
-function load(){
-  try{
-    const raw=localStorage.getItem('gamelib-data');
-    if(raw){const d=JSON.parse(raw);devices=d.devices||[];games=d.games||[];}
-  }catch(e){devices=[];games=[];}
+// ══════════════════════════════════════
+// STORAGE
+// ══════════════════════════════════════
+const STORAGE_KEY = 'gameshelf-v2';
+
+async function load(){
+  try {
+    // Try persistent storage API first
+    if(window.storage){
+      const r = await window.storage.get(STORAGE_KEY);
+      if(r && r.value){ const d=JSON.parse(r.value); devices=d.devices||[]; games=d.games||[]; }
+    } else {
+      // Fallback to localStorage
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){ const d=JSON.parse(raw); devices=d.devices||[]; games=d.games||[]; }
+    }
+  } catch(e){ devices=[]; games=[]; }
+
   if(!devices.length){
-    devices=[{id:'d1',name:'Mon PC',type:'pc',emulators:[]},{id:'d2',name:'Raspberry Pi',type:'emulator',emulators:['NES','SNES','GBA','PS1']}];
-    games=[
-      {id:'g1',title:'Minecraft',device:'d1',platform:'PC',status:'inprogress',time:120,note:'Mode survie, construction en cours'},
-      {id:'g2',title:'Super Mario Bros',device:'d2',platform:'NES',status:'done',time:8,note:'Terminé en une soirée !'},
-      {id:'g3',title:'Pokémon FireRed',device:'d2',platform:'GBA',status:'notstarted',time:0,note:''},
-      {id:'g4',title:'Stardew Valley',device:'d1',platform:'PC',status:'done',time:200,note:'Ferme complète'}
+    devices = [
+      {id:'d1', name:'Mon PC', type:'pc', emulators:[]},
+      {id:'d2', name:'Raspberry Pi', type:'emulator', emulators:['NES','SNES','GBA','PS1','N64']}
     ];
-    save();
+    games = [
+      {id:'g1',title:'Minecraft',device:'d1',platform:'PC',source:'manual',status:'inprogress',time:120,note:'Mode survie, construction en cours',cover:'',steamAppId:''},
+      {id:'g2',title:'Super Mario Bros',device:'d2',platform:'NES',source:'manual',status:'done',time:8,note:'Terminé !',cover:'',steamAppId:''},
+      {id:'g3',title:'Pokémon FireRed',device:'d2',platform:'GBA',source:'manual',status:'notstarted',time:0,note:'',cover:'',steamAppId:''},
+      {id:'g4',title:'Stardew Valley',device:'d1',platform:'PC',source:'steam',status:'done',time:200,note:'Ferme terminée',cover:'',steamAppId:'413150'}
+    ];
+    await save();
   }
   renderAll();
 }
 
-function save(){
-  const lbl=document.getElementById('save-label');
-  try{
-    localStorage.setItem('gamelib-data',JSON.stringify({devices,games}));
-    if(lbl){lbl.textContent='Sauvegardé ✓';setTimeout(()=>{if(lbl)lbl.textContent='';},2000);}
-  }catch(e){if(lbl)lbl.textContent='Erreur de sauvegarde';}
+async function save(){
+  const lbl = document.getElementById('save-label');
+  const data = JSON.stringify({devices, games});
+  try {
+    if(window.storage){ await window.storage.set(STORAGE_KEY, data); }
+    else { localStorage.setItem(STORAGE_KEY, data); }
+    if(lbl){ lbl.textContent='Sauvegardé ✓'; setTimeout(()=>{ if(lbl) lbl.textContent=''; },2000); }
+  } catch(e){ if(lbl) lbl.textContent='Erreur de sauvegarde'; }
 }
 
-function renderAll(){renderDeviceTabs();renderGames();renderDeviceList();renderStats();renderBottomNavs();}
+// ══════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════
+function renderAll(){ renderDeviceTabs(); renderGames(); renderDeviceList(); renderStats(); renderBottomNavs(); }
 
 function renderBottomNavs(){
-  const nav=`<div class="bnav-item ${activeView==='library'?'active':''}" onclick="switchView('library')"><div class="bnav-icon">🎮</div><div class="bnav-label">Jeux</div></div><div class="bnav-item ${activeView==='devices'?'active':''}" onclick="switchView('devices')"><div class="bnav-icon">🖥️</div><div class="bnav-label">Appareils</div></div><div class="bnav-item ${activeView==='stats'?'active':''}" onclick="switchView('stats')"><div class="bnav-icon">📊</div><div class="bnav-label">Stats</div></div>`;
-  ['bnav-lib','bnav-dev','bnav-stats'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=nav;});
+  const nav = `
+    <div class="bnav-item ${activeView==='library'?'active':''}" onclick="switchView('library')">
+      <div class="bnav-icon">🎮</div><div class="bnav-label">Jeux</div>
+    </div>
+    <div class="bnav-item ${activeView==='devices'?'active':''}" onclick="switchView('devices')">
+      <div class="bnav-icon">🖥️</div><div class="bnav-label">Appareils</div>
+    </div>
+    <div class="bnav-item ${activeView==='stats'?'active':''}" onclick="switchView('stats')">
+      <div class="bnav-icon">📊</div><div class="bnav-label">Stats</div>
+    </div>`;
+  ['bnav-lib','bnav-dev','bnav-stats'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=nav; });
 }
 
 function switchView(v){
@@ -440,135 +891,88 @@ function switchView(v){
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   renderBottomNavs();
-  if(v==='stats')renderStats();
+  if(v==='stats') renderStats();
 }
 
 function renderDeviceTabs(){
-  const el=document.getElementById('device-tabs');
-  if(!el)return;
-  el.innerHTML=`<div class="dtab ${activeTab==='all'?'active':''}" onclick="setTab('all')">Tous (${games.length})</div>`+devices.map(d=>`<div class="dtab ${activeTab===d.id?'active':''}" onclick="setTab('${d.id}')">${d.name} (${games.filter(g=>g.device===d.id).length})</div>`).join('');
+  const el = document.getElementById('device-tabs');
+  if(!el) return;
+  el.innerHTML = `<div class="dtab ${activeTab==='all'?'active':''}" onclick="setTab('all')">Tous (${games.length})</div>`
+    + devices.map(d=>`<div class="dtab ${activeTab===d.id?'active':''}" onclick="setTab('${d.id}')">${d.name} (${games.filter(g=>g.device===d.id).length})</div>`).join('');
 }
-function setTab(id){activeTab=id;renderDeviceTabs();renderGames();}
+function setTab(id){ activeTab=id; renderDeviceTabs(); renderGames(); }
 
-function updateConsoleFilter(){
-  const sel=document.getElementById('filter-console');
-  if(!sel)return;
-  const current=sel.value;
+function coverHtml(g, size=52, radius=10){
+  if(g.cover && g.cover.startsWith('data:')){
+    return `<div class="game-cover" style="width:${size}px;height:${size}px;border-radius:${radius}px"><img src="${g.cover}" alt="${g.title}"></div>`;
+  }
+  if(g.steamAppId){
+    const url = `https://cdn.cloudflare.steamstatic.com/steam/apps/${g.steamAppId}/capsule_184x69.jpg`;
+    return `<div class="game-cover" style="width:${size}px;height:${size}px;border-radius:${radius}px"><img src="${url}" onerror="this.parentElement.textContent='${coverFor(g.title)}';this.parentElement.style.background='${coverBgFor(g.title)}'" alt="${g.title}"></div>`;
+  }
+  return `<div class="game-cover" style="width:${size}px;height:${size}px;border-radius:${radius}px;background:${coverBgFor(g.title)}">${coverFor(g.title)}</div>`;
+}
 
-  // Toutes les consoles connues jusqu'à la Switch
-  const allKnown=[
-    // Nintendo
-    'NES','SNES','Nintendo 64','GameCube','Wii','Wii U','Nintendo Switch',
-    'Game Boy','Game Boy Color','Game Boy Advance','Nintendo DS','Nintendo 3DS',
-    'Virtual Boy',
-    // PlayStation
-    'PS1','PS2','PS3','PS4','PS5',
-    'PSP','PS Vita',
-    // Xbox
-    'Xbox','Xbox 360','Xbox One','Xbox Series X',
-    // Sega
-    'Master System','Mega Drive','Saturn','Dreamcast',
-    'Game Gear','Sega CD','32X',
-    // Atari
-    'Atari 2600','Atari 5200','Atari 7800','Atari Jaguar','Atari Lynx',
-    // NEC
-    'PC Engine','PC-FX',
-    // SNK
-    'Neo Geo','Neo Geo Pocket',
-    // PC
-    'PC','Mac',
-    // Autres
-    'Arcade','3DO','ColecoVision','Intellivision','Odyssey'
-  ];
-
-  const fromGames=games.map(g=>g.platform).filter(Boolean);
-  const fromEmulators=devices.filter(d=>d.type==='emulator').flatMap(d=>d.emulators);
-  const allConsoles=[...new Set([...allKnown,...fromGames,...fromEmulators])].sort();
-  sel.innerHTML='<option value="">Toutes</option>'+allConsoles.map(c=>`<option value="${c}"${c===current?' selected':''}>${c}</option>`).join('');
+function srcDot(src){
+  const cls = {steam:'src-steam',epic:'src-epic',gog:'src-gog',manual:'src-manual'}[src]||'src-manual';
+  return `<span class="src-dot ${cls}"></span>`;
 }
 
 function renderGames(){
-  updateConsoleFilter();
-  const search=(document.getElementById('search')?.value||'').toLowerCase();
-  const fs=document.getElementById('filter-status')?.value||'';
-  const fc=document.getElementById('filter-console')?.value||'';
-  const groupBy=document.getElementById('group-by')?.value||'';
-  let filtered=games.filter(g=>{
-    if(activeTab!=='all'&&g.device!==activeTab)return false;
-    if(search&&!g.title.toLowerCase().includes(search))return false;
-    if(fs&&g.status!==fs)return false;
-    if(fc&&(g.platform||'')!==fc)return false;
+  const search = (document.getElementById('search')?.value||'').toLowerCase();
+  const fs = document.getElementById('filter-status')?.value||'';
+  let filtered = games.filter(g=>{
+    if(activeTab!=='all' && g.device!==activeTab) return false;
+    if(search && !g.title.toLowerCase().includes(search)) return false;
+    if(fs && g.status!==fs) return false;
     return true;
   });
-  const total=games.length,done=games.filter(g=>g.status==='done').length,hrs=games.reduce((s,g)=>s+(g.time||0),0);
+
+  const total=games.length, done=games.filter(g=>g.status==='done').length, hrs=games.reduce((s,g)=>s+(g.time||0),0);
   const ls=document.getElementById('lib-stats');
-  if(ls)ls.textContent=`${total} jeu${total!==1?'x':''} · ${done} terminé${done!==1?'s':''} · ${formatTime(hrs)}`;
+  if(ls) ls.textContent=`${total} jeu${total!==1?'x':''} · ${done} terminé${done!==1?'s':''} · ${Math.round(hrs)}h jouées`;
+
   const list=document.getElementById('game-list');
   const empty=document.getElementById('empty-lib');
-  if(!list)return;
-  if(filtered.length===0){list.innerHTML='';empty.style.display='block';return;}
+  if(!list) return;
+  if(filtered.length===0){ list.innerHTML=''; empty.style.display='block'; return; }
   empty.style.display='none';
 
-  function gameCard(g){
+  list.innerHTML = filtered.map(g=>{
     const dev=getDevice(g.device);
-    const sub=g.platform?`${dev?dev.name:'?'} · ${g.platform}`:dev?dev.name:'?';
+    const sub = g.platform ? `${dev?dev.name:'?'} · ${g.platform}` : dev?dev.name:'?';
     return `<div class="game-row" onclick="openDetail('${g.id}')">
-      <div class="game-icon" style="background:${coverBg(g.title)}">${coverFor(g.title)}</div>
-      <div class="game-info"><div class="game-title">${g.title}</div><div class="game-meta">${sub}</div></div>
-      <div class="game-right"><span class="badge ${statusClass[g.status]}">${statusLabel[g.status]}</span><span class="time-lbl">${formatTime(g.time)}</span></div>
+      ${coverHtml(g)}
+      <div class="game-info">
+        <div class="game-title">${g.title}</div>
+        <div class="game-meta">${srcDot(g.source)}<span>${sub}</span></div>
+      </div>
+      <div class="game-right">
+        <span class="badge ${statusClass[g.status]}">${statusLabel[g.status]}</span>
+        <span class="time-lbl">${g.time>0?Math.round(g.time)+'h':'—'}</span>
+      </div>
     </div>`;
-  }
-
-  if(!groupBy){
-    list.innerHTML=`<div class="game-list">${filtered.map(gameCard).join('')}</div>`;
-    return;
-  }
-
-  if(groupBy==='status'){
-    const order=['inprogress','notstarted','done'];
-    const icons={inprogress:'🕹️',notstarted:'📋',done:'✅'};
-    let html='';
-    order.forEach(s=>{
-      const group=filtered.filter(g=>g.status===s);
-      if(!group.length)return;
-      html+=`<div class="group-title">${icons[s]} ${statusLabel[s]} (${group.length})</div>`;
-      html+=`<div class="game-list" style="margin-bottom:8px">${group.map(gameCard).join('')}</div>`;
-    });
-    list.innerHTML=html;
-    return;
-  }
-
-  if(groupBy==='console'){
-    // Grouper par plateforme/console
-    const consoles=[...new Set(filtered.map(g=>g.platform||'Autre'))].sort();
-    let html='';
-    consoles.forEach(c=>{
-      const group=filtered.filter(g=>(g.platform||'Autre')===c);
-      html+=`<div class="group-title">🎮 ${c} (${group.length})</div>`;
-      html+=`<div class="game-list" style="margin-bottom:8px">${group.map(gameCard).join('')}</div>`;
-    });
-    list.innerHTML=html;
-  }
+  }).join('');
 }
 
 function renderDeviceList(){
   const el=document.getElementById('device-list');
   const empty=document.getElementById('empty-dev');
-  const ds=document.getElementById('dev-stats');
-  if(!el)return;
-  if(ds)ds.textContent=`${devices.length} appareil${devices.length!==1?'s':''}`;
-  if(devices.length===0){el.innerHTML='';empty.style.display='block';return;}
+  const ds=document.getElementById('dev-sub');
+  if(!el) return;
+  if(ds) ds.textContent=`${devices.length} appareil${devices.length!==1?'s':''}`;
+  if(devices.length===0){ el.innerHTML=''; empty.style.display='block'; return; }
   empty.style.display='none';
-  el.innerHTML=devices.map(d=>{
+  el.innerHTML = devices.map(d=>{
     const count=games.filter(g=>g.device===d.id).length;
     const icon=d.type==='emulator'?'🕹️':'🖥️';
     const sub=d.type==='emulator'&&d.emulators.length?d.emulators.join(', '):'PC / Mac';
-    return `<div class="device-card" onclick="openDeviceDetail('${d.id}')">
+    return `<div class="device-card">
       <div class="device-card-left">
-        <div class="device-avatar" style="background:${d.type==='emulator'?'#EEEDFE':'#E6F1FB'}">${icon}</div>
+        <div class="device-avatar">${icon}</div>
         <div><div class="device-name">${d.name}</div><div class="device-sub">${sub}</div></div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px">
+      <div style="display:flex;align-items:center;gap:6px">
         <span class="device-count">${count} jeu${count!==1?'x':''}</span>
         <span class="chevron">›</span>
       </div>
@@ -578,62 +982,70 @@ function renderDeviceList(){
 
 function renderStats(){
   const el=document.getElementById('stats-content');
-  if(!el)return;
-  const total=games.length;
-  const done=games.filter(g=>g.status==='done').length;
+  if(!el) return;
+  const total=games.length, done=games.filter(g=>g.status==='done').length;
   const inprog=games.filter(g=>g.status==='inprogress').length;
-  const hrs=games.reduce((s,g)=>s+(g.time||0),0);
+  const ns=games.filter(g=>g.status==='notstarted').length;
+  const hrs=Math.round(games.reduce((s,g)=>s+(g.time||0),0));
   const pct=total>0?Math.round(done/total*100):0;
-  const byDevice=devices.map(d=>{
+
+  const srcCount={steam:0,epic:0,gog:0,manual:0};
+  games.forEach(g=>{ const s=g.source||'manual'; srcCount[s]=(srcCount[s]||0)+1; });
+
+  const byDev=devices.map(d=>{
     const dg=games.filter(g=>g.device===d.id);
-    return {name:d.name,count:dg.length,hrs:dg.reduce((s,g)=>s+(g.time||0),0)};
+    return {name:d.name, count:dg.length, hrs:Math.round(dg.reduce((s,g)=>s+(g.time||0),0))};
   }).filter(d=>d.count>0);
+
   el.innerHTML=`
     <div class="stat-grid">
       <div class="stat-card"><div class="lbl">Total jeux</div><div class="val">${total}</div></div>
-      <div class="stat-card"><div class="lbl">Heures jouées</div><div class="val">${formatTime(hrs)}</div></div>
+      <div class="stat-card"><div class="lbl">Heures jouées</div><div class="val">${hrs}</div></div>
       <div class="stat-card"><div class="lbl">Terminés</div><div class="val">${done}</div><div class="sub">${pct}% de la biblio</div></div>
       <div class="stat-card"><div class="lbl">En cours</div><div class="val">${inprog}</div></div>
     </div>
+
     <div class="section-title">Par état</div>
-    ${['done','inprogress','notstarted'].map(s=>{
+    ${[['done','var(--green)'],['inprogress','var(--amber)'],['notstarted','var(--text3)']].map(([s,col])=>{
       const n=games.filter(g=>g.status===s).length;
       const p=total>0?Math.round(n/total*100):0;
-      return `<div style="margin-bottom:10px">
-        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
-          <span class="badge ${statusClass[s]}">${statusLabel[s]}</span>
-          <span style="color:var(--color-text-secondary)">${n} jeu${n!==1?'x':''} · ${p}%</span>
+      return `<div class="prog-row">
+        <div class="prog-label">
+          <span><span class="badge ${statusClass[s]}">${statusLabel[s]}</span></span>
+          <span>${n} jeu${n!==1?'x':''} · ${p}%</span>
         </div>
-        <div style="background:var(--color-background-secondary);border-radius:6px;height:6px;overflow:hidden">
-          <div style="height:100%;width:${p}%;background:${s==='done'?'#639922':s==='inprogress'?'#EF9F27':'#888780'};border-radius:6px"></div>
-        </div>
+        <div class="prog-bar"><div class="prog-fill" style="width:${p}%;background:${col}"></div></div>
       </div>`;
     }).join('')}
-    ${byDevice.length>0?`<div class="section-title">Par appareil</div>`+byDevice.map(d=>`
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:13px">
-        <span style="color:var(--color-text-primary)">${d.name}</span>
-        <span style="color:var(--color-text-secondary)">${d.count} jeux · ${formatTime(d.hrs)}</span>
-      </div>`).join(''):''}
+
+    <div class="section-title">Par source</div>
+    <div class="source-legend">
+      ${[['steam','var(--steam)','Steam'],['epic','var(--epic)','Epic'],['gog','var(--gog)','GOG'],['manual','var(--text3)','Manuel']].map(([s,col,lbl])=>`
+        <div class="src-item"><span class="src-dot" style="background:${col}"></span>${lbl}: ${srcCount[s]||0}</div>
+      `).join('')}
+    </div>
+
+    ${byDev.length>0?`
+      <div class="section-title">Par appareil</div>
+      ${byDev.map(d=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px">
+          <span style="color:var(--text)">${d.name}</span>
+          <span style="color:var(--text3)">${d.count} jeux · ${d.hrs}h</span>
+        </div>`).join('')}
+    `:''}
   `;
 }
 
-function openAddGame(){
-  editingId=null;
-  document.getElementById('sheet-game-title').textContent='Ajouter un jeu';
-  document.getElementById('g-title').value='';
-  document.getElementById('g-time-h').value='';
-  document.getElementById('g-time-m').value='';
-  document.getElementById('g-note').value='';
-  document.getElementById('g-status').value='notstarted';
-  populateDeviceSelect();
-  openSheet('sheet-game');
-}
-function populateDeviceSelect(){
-  const sel=document.getElementById('g-device');
-  if(!devices.length){sel.innerHTML='<option value="">Aucun appareil</option>';return;}
+// ══════════════════════════════════════
+// GAME CRUD
+// ══════════════════════════════════════
+function populateDeviceSelect(selId='g-device'){
+  const sel=document.getElementById(selId);
+  if(!devices.length){ sel.innerHTML='<option value="">Aucun appareil</option>'; return; }
   sel.innerHTML=devices.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
-  onDeviceChange();
+  if(selId==='g-device') onDeviceChange();
 }
+
 function onDeviceChange(){
   const dev=getDevice(document.getElementById('g-device').value);
   const pSel=document.getElementById('g-platform');
@@ -643,199 +1055,371 @@ function onDeviceChange(){
     pSel.innerHTML='<option value="PC">PC</option><option value="Mac">Mac</option>';
   }
 }
-function saveGame(){
+
+function openAddGame(){
+  editingId=null; coverDataUrl=null;
+  document.getElementById('sheet-game-ttl').textContent='Ajouter un jeu';
+  document.getElementById('g-title').value='';
+  document.getElementById('g-time').value='';
+  document.getElementById('g-note').value='';
+  document.getElementById('g-status').value='notstarted';
+  document.getElementById('g-source').value='manual';
+  document.getElementById('g-steamid').value='';
+  document.getElementById('cover-preview').innerHTML='🎮<input type="file" id="cover-file" accept="image/*" style="display:none" onchange="onCoverFile(event)">';
+  document.getElementById('cover-results-wrap').style.display='none';
+  document.getElementById('cover-results').innerHTML='';
+  populateDeviceSelect();
+  openSheet('sheet-game');
+}
+
+function triggerCoverFile(){ document.getElementById('cover-file')?.click(); }
+
+function onCoverFile(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    coverDataUrl=ev.target.result;
+    const prev=document.getElementById('cover-preview');
+    prev.innerHTML=`<img src="${coverDataUrl}" alt="cover"><input type="file" id="cover-file" accept="image/*" style="display:none" onchange="onCoverFile(event)">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+let searchCoverTimer=null;
+function onTitleInput(){
+  clearTimeout(searchCoverTimer);
   const title=document.getElementById('g-title').value.trim();
-  if(!title){alert('Le titre est requis.');return;}
+  const steamId=document.getElementById('g-steamid').value.trim();
+  if(title.length<3){ document.getElementById('cover-results-wrap').style.display='none'; return; }
+  searchCoverTimer=setTimeout(()=>searchCoversByTitle(title),700);
+}
+
+async function searchCoversByTitle(title){
+  // Use Steam search heuristic: try known steam app IDs for popular games
+  // and IGDB-style cover via proxy. We'll show Steam CDN covers for matched appIds.
+  const wrap=document.getElementById('cover-results-wrap');
+  const resultsEl=document.getElementById('cover-results');
+  const steamId=document.getElementById('g-steamid').value.trim();
+
+  // Build candidate image URLs
+  const candidates=[];
+  if(steamId){
+    candidates.push(`https://cdn.cloudflare.steamstatic.com/steam/apps/${steamId}/library_600x900.jpg`);
+    candidates.push(`https://cdn.cloudflare.steamstatic.com/steam/apps/${steamId}/header.jpg`);
+    candidates.push(`https://cdn.cloudflare.steamstatic.com/steam/apps/${steamId}/capsule_616x353.jpg`);
+  }
+
+  // Show cover search results
+  if(candidates.length>0){
+    wrap.style.display='block';
+    resultsEl.innerHTML=candidates.map((url,i)=>`
+      <img class="cover-opt" src="${url}" data-url="${url}"
+        onerror="this.style.display='none'"
+        onclick="selectCover(this)"
+        alt="pochette ${i+1}">
+    `).join('');
+  } else {
+    wrap.style.display='none';
+  }
+}
+
+function selectCover(img){
+  document.querySelectorAll('.cover-opt').forEach(el=>el.classList.remove('selected'));
+  img.classList.add('selected');
+  coverDataUrl = img.dataset.url; // URL (not base64) — that's fine for display
+  const prev=document.getElementById('cover-preview');
+  prev.innerHTML=`<img src="${coverDataUrl}" alt="cover"><input type="file" id="cover-file" accept="image/*" style="display:none" onchange="onCoverFile(event)">`;
+}
+
+async function saveGame(){
+  const title=document.getElementById('g-title').value.trim();
+  if(!title){ alert('Le titre est requis.'); return; }
   const devId=document.getElementById('g-device').value;
-  const h=parseFloat(document.getElementById('g-time-h').value)||0;
-  const m=parseFloat(document.getElementById('g-time-m').value)||0;
-  const data={title,device:devId,platform:document.getElementById('g-platform').value,status:document.getElementById('g-status').value,time:h+(m/60),note:document.getElementById('g-note').value.trim()};
-  if(editingId){Object.assign(games.find(g=>g.id===editingId),data);}
-  else{games.push({id:uid(),...data});}
+  const steamId=document.getElementById('g-steamid').value.trim();
+
+  // Auto-fetch Steam cover if steamId given and no manual cover
+  let finalCover=coverDataUrl||'';
+  if(steamId && !coverDataUrl){
+    finalCover=`steam:${steamId}`; // stored as steam reference
+  }
+
+  const data={
+    title, device:devId,
+    platform:document.getElementById('g-platform').value,
+    source:document.getElementById('g-source').value,
+    status:document.getElementById('g-status').value,
+    time:parseFloat(document.getElementById('g-time').value)||0,
+    note:document.getElementById('g-note').value.trim(),
+    steamAppId:steamId,
+    cover:finalCover
+  };
+
+  if(editingId){ Object.assign(games.find(g=>g.id===editingId), data); }
+  else { games.push({id:uid(),...data}); }
+
   closeSheet('sheet-game');
-  save();
+  await save();
   renderAll();
 }
 
+// ══════════════════════════════════════
+// DETAIL
+// ══════════════════════════════════════
 function openDetail(id){
   detailId=id;
   const g=games.find(x=>x.id===id);
   const dev=getDevice(g.device);
-  document.getElementById('det-cover').style.background=coverBg(g.title);
-  document.getElementById('det-cover').textContent=coverFor(g.title);
+
+  // Hero cover
+  const hero=document.getElementById('det-cover');
+  if(g.cover && g.cover.startsWith('data:')){
+    hero.innerHTML=`<img src="${g.cover}" alt="${g.title}">`;
+    hero.style.background='';
+  } else if(g.steamAppId){
+    const url=`https://cdn.cloudflare.steamstatic.com/steam/apps/${g.steamAppId}/library_600x900.jpg`;
+    hero.innerHTML=`<img src="${url}" onerror="this.parentElement.innerHTML='${coverFor(g.title)}';this.parentElement.style.background='${coverBgFor(g.title)}'" alt="${g.title}">`;
+    hero.style.background='';
+  } else {
+    hero.innerHTML=coverFor(g.title);
+    hero.style.background=coverBgFor(g.title);
+  }
+
   document.getElementById('det-title').textContent=g.title;
-  document.getElementById('det-sub').textContent=dev?dev.name:'?';
+  const srcLabels={steam:'Steam',epic:'Epic Games',gog:'GOG',manual:'Ajouté manuellement'};
+  document.getElementById('det-sub').textContent=`${dev?dev.name:'?'}${g.platform?' · '+g.platform:''} · ${srcLabels[g.source]||'Manuel'}`;
   document.getElementById('det-status-v').innerHTML=`<span class="badge ${statusClass[g.status]}">${statusLabel[g.status]}</span>`;
-  document.getElementById('det-time-v').textContent=formatTime(g.time);
+  document.getElementById('det-time-v').textContent=g.time>0?Math.round(g.time)+'h':'—';
   document.getElementById('det-plat-v').textContent=g.platform||'—';
   document.getElementById('det-note').textContent=g.note||'Aucune note.';
   openSheet('sheet-detail');
 }
+
 function editFromDetail(){
   closeSheet('sheet-detail');
   const g=games.find(x=>x.id===detailId);
   editingId=g.id;
-  document.getElementById('sheet-game-title').textContent='Modifier le jeu';
+  coverDataUrl=g.cover||null;
+  document.getElementById('sheet-game-ttl').textContent='Modifier le jeu';
   populateDeviceSelect();
   document.getElementById('g-title').value=g.title;
   document.getElementById('g-device').value=g.device;
   onDeviceChange();
-  document.getElementById('g-platform').value=g.platform;
+  setTimeout(()=>{ document.getElementById('g-platform').value=g.platform||''; },50);
+  document.getElementById('g-source').value=g.source||'manual';
+  document.getElementById('g-steamid').value=g.steamAppId||'';
   document.getElementById('g-status').value=g.status;
-  const gh=Math.floor(g.time||0);
-  const gm=Math.round(((g.time||0)-gh)*60);
-  document.getElementById('g-time-h').value=gh||'';
-  document.getElementById('g-time-m').value=gm||'';
+  document.getElementById('g-time').value=g.time||'';
   document.getElementById('g-note').value=g.note||'';
+
+  // Restore cover preview
+  const prev=document.getElementById('cover-preview');
+  if(g.cover && g.cover.startsWith('data:')){
+    prev.innerHTML=`<img src="${g.cover}" alt="cover"><input type="file" id="cover-file" accept="image/*" style="display:none" onchange="onCoverFile(event)">`;
+  } else if(g.steamAppId){
+    const url=`https://cdn.cloudflare.steamstatic.com/steam/apps/${g.steamAppId}/library_600x900.jpg`;
+    prev.innerHTML=`<img src="${url}" alt="cover"><input type="file" id="cover-file" accept="image/*" style="display:none" onchange="onCoverFile(event)">`;
+  } else {
+    prev.innerHTML=`🎮<input type="file" id="cover-file" accept="image/*" style="display:none" onchange="onCoverFile(event)">`;
+  }
+
+  document.getElementById('cover-results-wrap').style.display='none';
   openSheet('sheet-game');
 }
-function deleteGame(){
-  showConfirm('Supprimer ce jeu ?', 'Cette action est irréversible.', function(){
-    games=games.filter(g=>g.id!==detailId);
-    closeSheet('sheet-detail');
-    save();
-    renderAll();
-  });
-}
 
-let editingDeviceId=null;
-
-function openAddDevice(){
-  editingDeviceId=null;
-  document.getElementById('sheet-device-title').textContent='Ajouter un appareil';
-  document.getElementById('d-name').value='';
-  document.getElementById('d-type').value='pc';
-  Array.from(document.getElementById('d-emulators').options).forEach(o=>o.selected=false);
-  document.getElementById('d-emu-wrap').style.display='none';
-  document.getElementById('btn-delete-device').style.display='none';
-  openSheet('sheet-device');
-}
-
-function openDeviceDetail(id){
-  editingDeviceId=id;
-  const d=devices.find(x=>x.id===id);
-  document.getElementById('sheet-device-title').textContent='Modifier l\'appareil';
-  document.getElementById('d-name').value=d.name;
-  document.getElementById('d-type').value=d.type;
-  const emuSel=document.getElementById('d-emulators');
-  Array.from(emuSel.options).forEach(o=>o.selected=d.emulators.includes(o.value));
-  document.getElementById('d-emu-wrap').style.display=d.type==='emulator'?'block':'none';
-  document.getElementById('btn-delete-device').style.display='block';
-  openSheet('sheet-device');
-}
-
-function saveDevice(){
-  const name=document.getElementById('d-name').value.trim();
-  if(!name){alert('Le nom est requis.');return;}
-  const type=document.getElementById('d-type').value;
-  const emulators=type==='emulator'?Array.from(document.getElementById('d-emulators').selectedOptions).map(o=>o.value):[];
-  if(editingDeviceId){
-    const d=devices.find(x=>x.id===editingDeviceId);
-    d.name=name;d.type=type;d.emulators=emulators;
-  } else {
-    devices.push({id:uid(),name,type,emulators});
-  }
-  closeSheet('sheet-device');
-  save();
+async function deleteGame(){
+  if(!confirm('Supprimer ce jeu ?')) return;
+  games=games.filter(g=>g.id!==detailId);
+  closeSheet('sheet-detail');
+  await save();
   renderAll();
 }
 
-function deleteDevice(){
-  const d=devices.find(x=>x.id===editingDeviceId);
-  const count=games.filter(g=>g.device===editingDeviceId).length;
-  const msg=count>0?`Cet appareil contient ${count} jeu${count>1?'x':''}. Ils seront conservés mais sans appareil assigné.`:'Cette action est irréversible.';
-  showConfirm(`Supprimer "${d.name}" ?`, msg, function(){
-    devices=devices.filter(x=>x.id!==editingDeviceId);
-    closeSheet('sheet-device');
-    save();
-    renderAll();
-  });
+// ══════════════════════════════════════
+// DEVICE CRUD
+// ══════════════════════════════════════
+function openAddDevice(){
+  document.getElementById('d-name').value='';
+  document.getElementById('d-type').value='pc';
+  document.getElementById('d-emulators').value='';
+  document.getElementById('d-emu-wrap').style.display='none';
+  openSheet('sheet-device');
 }
 
-function formatTime(hours){
-  if(!hours||hours<=0)return '—';
-  const h=Math.floor(hours);
-  const m=Math.round((hours-h)*60);
-  if(h===0)return `${m}min`;
-  if(m===0)return `${h}h`;
-  return `${h}h ${m}min`;
+async function saveDevice(){
+  const name=document.getElementById('d-name').value.trim();
+  if(!name){ alert('Le nom est requis.'); return; }
+  const type=document.getElementById('d-type').value;
+  const emulators=type==='emulator'
+    ? document.getElementById('d-emulators').value.split(',').map(s=>s.trim()).filter(Boolean)
+    : [];
+  devices.push({id:uid(), name, type, emulators});
+  closeSheet('sheet-device');
+  await save();
+  renderAll();
 }
 
-function exportCSV(){
-  const statusFr={notstarted:'pas commencé',inprogress:'en cours',done:'terminé'};
-  const header='titre,appareil,plateforme,etat,temps,note';
-  const rows=games.map(g=>{
-    const dev=getDevice(g.device);
-    const titre=`"${(g.title||'').replace(/"/g,'""')}"`;
-    const appareil=`"${(dev?dev.name:'').replace(/"/g,'""')}"`;
-    const plateforme=`"${(g.platform||'').replace(/"/g,'""')}"`;
-    const etat=statusFr[g.status]||'';
-    const temps=g.time||0;
-    const note=`"${(g.note||'').replace(/"/g,'""')}"`;
-    return [titre,appareil,plateforme,etat,temps,note].join(',');
-  });
-  const csv=[header,...rows].join('\n');
-  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;
-  a.download='ludotheque.csv';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+// ══════════════════════════════════════
+// STEAM IMPORT
+// ══════════════════════════════════════
+function openSteamImport(){
+  document.getElementById('steam-id').value='';
+  document.getElementById('steam-result').style.display='none';
+  document.getElementById('steam-error').style.display='none';
+  document.getElementById('btn-steam-import').style.display='none';
+  pendingSteamGames=[];
+  populateDeviceSelect('steam-device');
+  openSheet('sheet-steam');
 }
 
-function openImportSheet(){
-  pendingImport=[];
-  document.getElementById('import-feedback').textContent='';
-  document.getElementById('btn-confirm-import').style.display='none';
-  document.getElementById('csv-file').value='';
-  openSheet('sheet-import');
+async function fetchSteamGames(){
+  const steamId=document.getElementById('steam-id').value.trim();
+  if(!steamId){ alert('Entrez votre Steam ID.'); return; }
+
+  const btn=document.getElementById('btn-steam-fetch');
+  const errEl=document.getElementById('steam-error');
+  const resEl=document.getElementById('steam-result');
+  btn.textContent='Chargement…'; btn.disabled=true;
+  errEl.style.display='none'; resEl.style.display='none';
+
+  try {
+    // Steam GetOwnedGames API — works when profile is public
+    // Using a CORS proxy approach via allorigins
+    const apiUrl=`https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=&steamid=${steamId}&include_appinfo=1&include_played_free_games=1&format=json`;
+    const proxyUrl=`https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
+
+    const resp=await fetch(proxyUrl);
+    const outer=await resp.json();
+    const data=JSON.parse(outer.contents);
+
+    if(!data.response || !data.response.games){
+      throw new Error('Profil Steam privé ou Steam ID invalide. Rendez votre profil public dans les paramètres Steam.');
+    }
+
+    pendingSteamGames=data.response.games
+      .sort((a,b)=>(b.playtime_forever||0)-(a.playtime_forever||0))
+      .map(g=>({
+        id:uid(),
+        title:g.name,
+        device:document.getElementById('steam-device').value,
+        platform:'PC',
+        source:'steam',
+        status:g.playtime_forever>0?'inprogress':'notstarted',
+        time:Math.round((g.playtime_forever||0)/60),
+        note:'',
+        steamAppId:String(g.appid),
+        cover:''
+      }));
+
+    document.getElementById('steam-result-label').textContent=`${pendingSteamGames.length} jeux trouvés sur ce compte Steam :`;
+    document.getElementById('steam-game-list').innerHTML=pendingSteamGames.slice(0,30).map(g=>`
+      <div class="import-game-row">
+        <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/${g.steamAppId}/capsule_184x69.jpg"
+          onerror="this.style.display='none'" alt="${g.title}">
+        <span class="iname">${g.title}</span>
+        <span class="itime">${g.time>0?g.time+'h':'—'}</span>
+      </div>`).join('') + (pendingSteamGames.length>30?`<div style="text-align:center;padding:8px;color:var(--text3);font-size:11px">+${pendingSteamGames.length-30} autres jeux…</div>`:'');
+
+    resEl.style.display='block';
+    document.getElementById('btn-steam-import').style.display='block';
+
+  } catch(e){
+    errEl.textContent=e.message||'Erreur de connexion. Vérifiez votre Steam ID et votre connexion internet.';
+    errEl.style.display='block';
+  }
+
+  btn.textContent='Récupérer mes jeux'; btn.disabled=false;
 }
-function handleCSV(e){
-  const file=e.target.files[0];if(!file)return;
+
+async function confirmSteamImport(){
+  // Don't duplicate games already in library
+  const existingSteamIds=new Set(games.map(g=>g.steamAppId).filter(Boolean));
+  const toAdd=pendingSteamGames.filter(g=>!existingSteamIds.has(g.steamAppId));
+  const devId=document.getElementById('steam-device').value;
+  toAdd.forEach(g=>{ g.device=devId; games.push(g); });
+  closeSheet('sheet-steam');
+  await save();
+  renderAll();
+  alert(`✅ ${toAdd.length} jeux importés depuis Steam !${pendingSteamGames.length-toAdd.length>0?' ('+( pendingSteamGames.length-toAdd.length)+' déjà présents ignorés)':''}`);
+}
+
+// ══════════════════════════════════════
+// CSV IMPORT (Epic / GOG)
+// ══════════════════════════════════════
+let csvImportSource='epic';
+
+function openCsvImport(src){
+  csvImportSource=src;
+  pendingCsvGames=[];
+  document.getElementById('csv-sheet-title').textContent=`Importer ${src==='epic'?'Epic Games':'GOG'} CSV`;
+  document.getElementById('csv-result').style.display='none';
+  document.getElementById('btn-csv-import').style.display='none';
+  document.getElementById('csv-file-input').value='';
+  populateDeviceSelect('csv-device');
+  openSheet('sheet-csv');
+}
+
+function handleCsv(e){
+  const file=e.target.files[0]; if(!file) return;
   const reader=new FileReader();
   reader.onload=ev=>{
     const lines=ev.target.result.split('\n').filter(l=>l.trim());
-    const header=lines[0].toLowerCase().split(',').map(s=>s.trim());
-    pendingImport=[];
+    const header=lines[0].toLowerCase().split(',').map(s=>s.trim().replace(/"/g,''));
+    const smap={'terminé':'done','termine':'done','en cours':'inprogress','pas commencé':'notstarted','pas commence':'notstarted'};
+    pendingCsvGames=[];
     for(let i=1;i<lines.length;i++){
       const vals=lines[i].split(',').map(s=>s.trim().replace(/^"|"$/g,''));
-      const obj={};header.forEach((h,idx)=>obj[h]=vals[idx]||'');
-      if(obj.titre)pendingImport.push(obj);
+      const obj={}; header.forEach((h,idx)=>obj[h]=vals[idx]||'');
+      if(!obj.titre) continue;
+      pendingCsvGames.push({
+        id:uid(), title:obj.titre,
+        device:document.getElementById('csv-device').value,
+        platform:obj.plateforme||'PC',
+        source:csvImportSource,
+        status:smap[(obj.etat||'').toLowerCase()]||'notstarted',
+        time:parseFloat(obj.temps)||0,
+        note:obj.note||'',
+        steamAppId:'', cover:''
+      });
     }
-    document.getElementById('import-feedback').textContent=`${pendingImport.length} jeu(x) détecté(s) dans le fichier.`;
-    document.getElementById('btn-confirm-import').style.display=pendingImport.length?'block':'none';
+    document.getElementById('csv-result-label').textContent=`${pendingCsvGames.length} jeux détectés :`;
+    document.getElementById('csv-game-list').innerHTML=pendingCsvGames.slice(0,20).map(g=>`
+      <div class="import-game-row">
+        <span class="iname">${g.title}</span>
+        <span class="badge ${statusClass[g.status]}">${statusLabel[g.status]}</span>
+      </div>`).join('');
+    document.getElementById('csv-result').style.display='block';
+    document.getElementById('btn-csv-import').style.display=pendingCsvGames.length?'block':'none';
   };
   reader.readAsText(file);
 }
-function confirmImport(){
-  const smap={'terminé':'done','en cours':'inprogress','pas commencé':'notstarted'};
-  pendingImport.forEach(row=>{
-    let devId=devices[0]?.id;
-    const m=devices.find(d=>d.name.toLowerCase()===row.appareil?.toLowerCase());
-    if(m)devId=m.id;
-    games.push({id:uid(),title:row.titre,device:devId,platform:row.plateforme||'',status:smap[(row.etat||'').toLowerCase()]||'notstarted',time:parseFloat(row.temps)||0,note:row.note||''});
-  });
-  closeSheet('sheet-import');
-  save();
+
+async function confirmCsvImport(){
+  const devId=document.getElementById('csv-device').value;
+  pendingCsvGames.forEach(g=>{ g.device=devId; games.push(g); });
+  closeSheet('sheet-csv');
+  await save();
   renderAll();
+  alert(`✅ ${pendingCsvGames.length} jeux importés !`);
 }
 
-function openSheet(id){document.getElementById(id).classList.add('open');}
-function closeSheet(id){document.getElementById(id).classList.remove('open');}
+// ══════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════
+function openImportMenu(){ openSheet('sheet-import-menu'); }
+function openSheet(id){ document.getElementById(id).classList.add('open'); }
+function closeSheet(id){ document.getElementById(id).classList.remove('open'); }
 
-function showConfirm(title, message, onConfirm){
-  document.getElementById('confirm-title').textContent=title;
-  document.getElementById('confirm-message').textContent=message;
-  document.getElementById('confirm-ok').onclick=function(){
-    closeSheet('sheet-confirm');
-    onConfirm();
-  };
-  openSheet('sheet-confirm');
+function updateClock(){
+  const now=new Date();
+  const el=document.getElementById('clock');
+  if(el) el.textContent=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
 }
+updateClock();
+setInterval(updateClock, 15000);
 
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
 load();
 </script>
 </body>
